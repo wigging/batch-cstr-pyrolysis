@@ -27,23 +27,18 @@ ct.suppress_thermo_warnings()
 tk = 773.15     # reactor temperature [K]
 p = 101325.0    # reactor pressure [Pa]
 
-# initial mass fractions for softwood [-] and specify cti file
-label = 'Softwood'
-y0 = 'CELL:0.4002 GMSW:0.3112 LIGC:0.0287 LIGH:0.0196 LIGO:0.1379 TANN:0.0083 TGL:0.0941'
-gas = ct.Solution('data/debiagi_sw.cti')
+# Residues feedstock
+# label = 'Residues'
+# y0 = 'CELL:0.2799 GMSW:0.2280 LIGC:0.0014 LIGH:0.1160 LIGO:0.2504 TANN:0.02 TGL:0.1043'
+# gas = ct.Solution('data/debiagi_sw.cti')
 
-# initial mass fractions for hardwood [-] and specify cti file
-# label = 'Hardwood'
-# y0 = 'CELL:0.4109 XYHW:0.3150 LIGC:0.0202 LIGH:0.0133 LIGO:0.1443 TANN:0.0176 TGL:0.0786'
-# gas = ct.Solution('data/debiagi_hw.cti')
-
-# initial mass fractions for grass [-] and specify cti file
-# label = 'Grass'
-# y0 = 'CELL:0.4232 XYGR:0.3465 LIGC:0.0059 LIGH:0.0167 LIGO:0.1086 TANN:0.0095 TGL:0.0845'
-# gas = ct.Solution('data/debiagi_gr.cti')
+# Stem wood feedstock
+label = 'Stem wood'
+y0 = 'CELL:0.3754 GMSW:0.2713 LIGC:0.0 LIGH:0.3167 LIGO:0.0023 TANN:0.0 TGL:0.0343'
+gas = ct.Solution('data/debiagi_sw2.cti')
 
 # time vector to evaluate reaction rates [s]
-time = np.linspace(0, 2.0, 100)
+time = np.linspace(0, 10.0, 100)
 
 # Cantera batch reactor
 # ----------------------------------------------------------------------------
@@ -54,9 +49,38 @@ r = ct.IdealGasReactor(gas, energy='off')
 sim = ct.ReactorNet([r])
 states = ct.SolutionArray(gas, extra=['t'])
 
-for tm in time:
-    sim.advance(tm)
-    states.append(r.thermo.state, t=tm)
+for t in time:
+    sim.advance(t)
+    states.append(r.thermo.state, t=t)
+
+# species representing gases
+sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2')
+
+# species representing liquids (tars)
+sp_liquids = (
+    'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
+    'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H',
+    'CH3OH', 'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12',
+    'VANILLIN', 'ACQUA'
+)
+
+# species representing solids
+sp_solids = (
+    'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
+    'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR'
+)
+
+# species representing metaplastics
+sp_metaplastics = (
+    'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
+    'GH2', 'GC2H6'
+)
+
+# sum of species mass fractions for gases, liquids, solids, metaplastics
+y_gases = states(*sp_gases).Y.sum(axis=1)
+y_liquids = states(*sp_liquids).Y.sum(axis=1)
+y_solids = states(*sp_solids).Y.sum(axis=1)
+y_metaplastics = states(*sp_metaplastics).Y.sum(axis=1)
 
 # Print
 # ----------------------------------------------------------------------------
@@ -65,6 +89,14 @@ print(f'--- {label} Final Yields ---')
 print(f'Number of species = {len(states.species_names)}')
 for sp in states.species_names:
     print(f"{sp:11} {states(sp).Y[:, 0][-1]:.4f}")
+
+print(
+    f'\n{" " + label + " lumped yields ":*^70}\n\n'
+    f'gases         {y_gases[-1] * 100:.2f}\n'
+    f'liquids       {y_liquids[-1] * 100:.2f}\n'
+    f'solids        {y_solids[-1] * 100:.2f}\n'
+    f'metaplastics  {y_metaplastics[-1] * 100:.2f}\n'
+)
 
 
 # Plot
@@ -99,6 +131,16 @@ ax.plot(states.t, states('LIGCC').Y[:, 0], label='LIGCC')
 ax.plot(states.t, states('LIGOH').Y[:, 0], label='LIGOH')
 ax.plot(states.t, states('LIG').Y[:, 0], label='LIG')
 style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]')
+
+fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(10, 4.8), tight_layout=True)
+ax1.plot(states.t, y_gases, label='gases')
+ax1.plot(states.t, y_liquids, label='liquids')
+ax1.plot(states.t, y_solids, label='solids')
+ax1.plot(states.t, y_metaplastics, label='metaplastics')
+style(ax1, xlabel='Time [s]', ylabel='Mass fraction [-]')
+
+ax2.plot(states.t, states.T, color='m')
+style(ax2, xlabel='Time [s]', ylabel='Temperature [K]')
 
 species = states.species_names
 ys = [states(sp).Y[:, 0][-1] for sp in species]
