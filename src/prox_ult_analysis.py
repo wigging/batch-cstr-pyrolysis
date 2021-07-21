@@ -13,7 +13,7 @@ np.set_printoptions(precision=4, suppress=True)
 
 # Get feedstock data from JSON file and create Feedstock objects
 
-with open("feedstocks.json") as json_file:
+with open("data/feedstocks.json") as json_file:
     fdata = json.load(json_file)
 
 feeds = [Feedstock(f) for f in fdata]
