@@ -13,7 +13,7 @@ import chemics as cm
 # name = 'Residues'
 # yc = 0.5331
 # yh = 0.0641
-# alpha = 0.5
+# alpha = 0.51
 # beta = 0.98
 # gamma = 1
 # delta = 0.7
@@ -22,11 +22,11 @@ import chemics as cm
 # name = 'Stem wood'
 # yc = 0.5094
 # yh = 0.0639
-# alpha = 0.53
+# alpha = 0.56
 # beta = 1
 # gamma = 1
-# delta = 0.95
-# epsilon = 1
+# delta = 0.92
+# epsilon = 0.9
 
 name = 'Bark'
 yc = 0.5569
