@@ -38,6 +38,8 @@ feedstocks = [
     {'name': 'residues', 'biocomp': [28.46, 22.28, 0.14, 11.6, 25.09, 2.01, 10.43]},
     {'name': 'stem wood', 'biocomp': [39.48, 25.28, 0.0, 25.89, 4.37, 0.35, 4.63]},
     {'name': 'bark', 'biocomp': [33.83, 18.38, 31.90, 0.23, 2.52, 9.09, 4.05]},
+    {'name': 'needles', 'biocomp': [23.83, 17.22, 0.12, 9.98, 33.17, 3.89, 11.78]},
+    {'name': 'bark + needles', 'biocomp': [23.47, 16.29, 5.49, 6.75, 35.90, 3.59, 8.51]}
 ]
 
 # Chemical species representing gas, liquid, solid, metaplastic phases
@@ -64,7 +66,7 @@ sp_metaplastics = (
 # Cantera batch reactor
 # ----------------------------------------------------------------------------
 
-gas = ct.Solution('data/debiagi_sw.cti')
+gas = ct.Solution('data/debiagi_sw2.cti')
 
 n = len(feedstocks)
 names = []
@@ -74,7 +76,7 @@ yf_solids = np.zeros(n)
 yf_metas = np.zeros(n)
 
 print('\nLumped species final yields as mass fraction, dry ash-free basis\n')
-print('             Gases    Liquids  Solids   Metaplastics')
+print('Feedstock              Gases    Liquids  Solids   Metaplastics')
 
 for i, feed in enumerate(feedstocks):
 
@@ -104,7 +106,7 @@ for i, feed in enumerate(feedstocks):
     yf_metas[i] = y_metaplastics[-1]
 
     name = feed['name']
-    print(f'{name:10} {y_gases[-1]:8.4f} {y_liquids[-1]:8.4f} {y_solids[-1]:8.4f} {y_metaplastics[-1]:8.4f}')
+    print(f'{name:20} {y_gases[-1]:8.4f} {y_liquids[-1]:8.4f} {y_solids[-1]:8.4f} {y_metaplastics[-1]:8.4f}')
 
 
 # Plot
@@ -151,5 +153,46 @@ ax.set_yticklabels(names)
 ax.set_xlabel('Mass fraction [-]')
 ax.set_title('Metaplastics')
 style_barh(ax)
+
+# ---
+
+_, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(12, 4.8), sharey=True, tight_layout=True)
+
+ax1.barh(y, yf_gases, color='C6')
+ax1.set_yticks(y)
+ax1.set_yticklabels(names)
+ax1.set_xlabel('Mass fraction [-]')
+ax1.set_title('Gases')
+style_barh(ax1)
+
+ax2.barh(y, yf_liquids, color='C4')
+ax2.set_yticks(y)
+ax2.set_yticklabels(names)
+ax2.set_xlabel('Mass fraction [-]')
+ax2.set_title('Liquids')
+ax2.set_axisbelow(True)
+ax2.set_frame_on(False)
+ax2.tick_params(color='0.8')
+ax2.xaxis.grid(True, color='0.8')
+
+ax3.barh(y, yf_solids, color='C2')
+ax3.set_yticks(y)
+ax3.set_yticklabels(names)
+ax3.set_xlabel('Mass fraction [-]')
+ax3.set_title('Solids')
+ax3.set_axisbelow(True)
+ax3.set_frame_on(False)
+ax3.tick_params(color='0.8')
+ax3.xaxis.grid(True, color='0.8')
+
+ax4.barh(y, yf_metas, color='C1')
+ax4.set_yticks(y)
+ax4.set_yticklabels(names)
+ax4.set_xlabel('Mass fraction [-]')
+ax4.set_title('Metaplastics')
+ax4.set_axisbelow(True)
+ax4.set_frame_on(False)
+ax4.tick_params(color='0.8')
+ax4.xaxis.grid(True, color='0.8')
 
 plt.show()

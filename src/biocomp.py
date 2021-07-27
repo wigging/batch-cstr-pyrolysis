@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import chemics as cm
 
 # Feedstock parameters
+# ----------------------------------------------------------------------------
+
 # Default splitting parameters are α = 0.6, β = 0.8, γ = 0.8, δ = 1, ε = 1
 
 # name = 'Residues'
@@ -28,16 +30,35 @@ import chemics as cm
 # delta = 0.92
 # epsilon = 0.9
 
-name = 'Bark'
-yc = 0.5569
-yh = 0.0589
-alpha = 0.6
-beta = 0.05
-gamma = 0.05
-delta = 0.7
-epsilon = 0.8
+# name = 'Bark'
+# yc = 0.5569
+# yh = 0.0589
+# alpha = 0.6
+# beta = 0.05
+# gamma = 0.05
+# delta = 0.7
+# epsilon = 0.8
+
+# name = 'Needles'
+# yc = 0.5471
+# yh = 0.0636
+# alpha = 0.53
+# beta = 0.98
+# gamma = 1
+# delta = 0.64
+# epsilon = 0.86
+
+name = 'Bark + Needles'
+yc = 0.5479
+yh = 0.0613
+alpha = 0.54
+beta = 1
+gamma = 0.8
+delta = 0.62
+epsilon = 0.9
 
 # Calculate biomass composition
+# ----------------------------------------------------------------------------
 
 bc = cm.biocomp(yc, yh, alpha=alpha, beta=beta, gamma=gamma, delta=delta, epsilon=epsilon)
 
@@ -51,7 +72,8 @@ tgl = bc['y_daf'][6]
 total = cell + hemi + ligc + ligh + ligo + tann + tgl
 total_lig = sum(bc['y_daf'][2:5])
 
-# Print parameters and biomass composition as mass fraction, dry ash-free basis (daf)
+# Print parameters
+# ----------------------------------------------------------------------------
 
 print(
     f'\nParameters for {name} \n'
@@ -63,6 +85,9 @@ print(
     f'δ = {delta} \n'
     f'ε = {epsilon} \n'
 )
+
+# Print biomass composition as mass fraction, dry ash-free basis (daf)
+# ----------------------------------------------------------------------------
 
 print(
     'Biomass composition    daf \n'
@@ -78,6 +103,7 @@ print(
 )
 
 # Plot the reference mixtures
+# ----------------------------------------------------------------------------
 
 fig, ax = plt.subplots(tight_layout=True)
 cm.plot_biocomp(ax, yc, yh, bc['y_rm1'], bc['y_rm2'], bc['y_rm3'])
