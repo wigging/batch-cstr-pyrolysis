@@ -68,7 +68,7 @@ for f in feedstocks:
     ult_daf = f.calc_ult_daf()
     ult_cho = f.calc_ult_cho(ult_daf)
     chem_daf = f.calc_chem_daf()
-    chem_bc = f.calc_bio_comp(chem_daf) / 100
+    chem_bc = f.calc_chem_bc(chem_daf) / 100
 
     # C and H mass fractions from ultimate analysis data
     yc = ult_cho[0] / 100

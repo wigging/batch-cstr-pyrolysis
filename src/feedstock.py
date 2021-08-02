@@ -178,7 +178,7 @@ class Feedstock:
         return chem_daf
 
     @staticmethod
-    def calc_bio_comp(chem_daf):
+    def calc_chem_bc(chem_daf):
         """
         Calculate the biomass composition such that
         cellulose = glucan

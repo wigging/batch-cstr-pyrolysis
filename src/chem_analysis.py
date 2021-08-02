@@ -18,37 +18,37 @@ np.set_printoptions(precision=4, suppress=True)
 with open("data/feedstocks.json") as json_file:
     fdata = json.load(json_file)
 
-feeds = [Feedstock(f) for f in fdata]
+feeds = [Feedstock(fd) for fd in fdata]
 
 # Chemical analysis values for each feedstock
 
 n = len(feeds)
 chems = np.zeros((n, 12))
 
-for i, fd in enumerate(feeds):
-    chems[i] = fd.chem
-    chem_daf = fd.calc_chem_daf()
-    biocomp = fd.calc_bio_comp(chem_daf)
+for i, f in enumerate(feeds):
+    chems[i] = f.chem
+    chem_daf = f.calc_chem_daf()
+    biocomp = f.calc_chem_bc(chem_daf)
 
-    tot_d = sum(fd.chem)
+    tot_d = sum(f.chem)
     tot_daf = sum(chem_daf)
     tot_bio = sum(biocomp)
 
-    print(f'\n{" " + fd.name + ", Cycle " + str(fd.cycle) + " ":*^70}\n')
+    print(f'\n{" " + f.name + ", Cycle " + str(f.cycle) + " ":*^70}\n')
     print(
         'Chemical analysis wt. %        d      daf \n'
-        f'structural inorganics     {fd.chem[0]:>8} \n'
-        f'non-structural inorganics {fd.chem[1]:>8} \n'
-        f'water extractives         {fd.chem[2]:>8}{chem_daf[2]:>8.2f} \n'
-        f'ethanol extractives       {fd.chem[3]:>8}{chem_daf[3]:>8.2f} \n'
-        f'acetone extractives       {fd.chem[4]:>8}{chem_daf[4]:>8.2f} \n'
-        f'lignin                    {fd.chem[5]:>8}{chem_daf[5]:>8.2f} \n'
-        f'glucan                    {fd.chem[6]:>8}{chem_daf[6]:>8.2f} \n'
-        f'xylan                     {fd.chem[7]:>8}{chem_daf[7]:>8.2f} \n'
-        f'galactan                  {fd.chem[8]:>8}{chem_daf[8]:>8.2f} \n'
-        f'arabinan                  {fd.chem[9]:>8}{chem_daf[9]:>8.2f} \n'
-        f'mannan                    {fd.chem[10]:>8}{chem_daf[10]:>8.2f} \n'
-        f'acetyl                    {fd.chem[11]:>8}{chem_daf[11]:>8.2f} \n'
+        f'structural inorganics     {f.chem[0]:>8} \n'
+        f'non-structural inorganics {f.chem[1]:>8} \n'
+        f'water extractives         {f.chem[2]:>8}{chem_daf[2]:>8.2f} \n'
+        f'ethanol extractives       {f.chem[3]:>8}{chem_daf[3]:>8.2f} \n'
+        f'acetone extractives       {f.chem[4]:>8}{chem_daf[4]:>8.2f} \n'
+        f'lignin                    {f.chem[5]:>8}{chem_daf[5]:>8.2f} \n'
+        f'glucan                    {f.chem[6]:>8}{chem_daf[6]:>8.2f} \n'
+        f'xylan                     {f.chem[7]:>8}{chem_daf[7]:>8.2f} \n'
+        f'galactan                  {f.chem[8]:>8}{chem_daf[8]:>8.2f} \n'
+        f'arabinan                  {f.chem[9]:>8}{chem_daf[9]:>8.2f} \n'
+        f'mannan                    {f.chem[10]:>8}{chem_daf[10]:>8.2f} \n'
+        f'acetyl                    {f.chem[11]:>8}{chem_daf[11]:>8.2f} \n'
         f'total                     {tot_d:>8.2f}{tot_daf:>8.2f}'
     )
 
