@@ -1,7 +1,7 @@
 """
 Determine the biomass composition for a given FCIC feedstock using ultimate
-analysis data. Splitting parameters should be adjusted such that cellulose,
-hemicellulose, and total lignin are similar to the chemical analysis data.
+analysis data and splitting parameters. The splitting parameter values are
+obtained from `biocomp_all` results.
 """
 
 import matplotlib.pyplot as plt
@@ -15,49 +15,31 @@ import chemics as cm
 # name = 'Residues'
 # yc = 0.5331
 # yh = 0.0641
-# alpha = 0.51
-# beta = 0.98
+# alpha = 0.5175
+# beta = 0.8996
 # gamma = 1
-# delta = 0.7
-# epsilon = 0.9
+# delta = 0.6486
+# epsilon = 0.9246
 
 # name = 'Stem wood'
 # yc = 0.5094
 # yh = 0.0639
-# alpha = 0.56
-# beta = 1
-# gamma = 1
-# delta = 0.92
-# epsilon = 0.9
+# alpha = 0.5613
+# beta = 0.9810
+# gamma = 0.7683
+# delta = 0.9263
+# epsilon = 0.9958
 
-# name = 'Bark'
-# yc = 0.5569
-# yh = 0.0589
-# alpha = 0.6
-# beta = 0.05
-# gamma = 0.05
-# delta = 0.7
-# epsilon = 0.8
+name = 'Bark'
+yc = 0.5569
+yh = 0.0589
+alpha = 0.5265
+beta = 0.3359
+gamma = 0.0
+delta = 0.0
+epsilon = 0.8527
 
-# name = 'Needles'
-# yc = 0.5471
-# yh = 0.0636
-# alpha = 0.53
-# beta = 0.98
-# gamma = 1
-# delta = 0.64
-# epsilon = 0.86
-
-name = 'Bark + Needles'
-yc = 0.5479
-yh = 0.0613
-alpha = 0.54
-beta = 1
-gamma = 0.8
-delta = 0.62
-epsilon = 0.9
-
-# Calculate biomass composition
+# Biomass composition
 # ----------------------------------------------------------------------------
 
 bc = cm.biocomp(yc, yh, alpha=alpha, beta=beta, gamma=gamma, delta=delta, epsilon=epsilon)
