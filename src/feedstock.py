@@ -10,12 +10,23 @@ class Feedstock:
     cycle : int
         Cycle (experiment) number corresponding to feedstock.
     prox : ndarray
-        Proximate analysis FC, VM, ash, moisture as weight percent
-        (wt. %) reported on an as-determined basis (ad).
+        Proximate analysis data given as weight percent (wt. %) reported on an
+        as-determined basis (ad). Values are [FC, VM, ash, moisture].
     ult : ndarray
-        Ultimate analysis C, H, O, N, S, ash, moisture as weight percent
-        (wt. %) reported on an as-determined basis (ad). Reported values for
-        H and O exclude H and O from moisture content.
+        Ultimate analysis data given as weight percent (wt. %) reported on an
+        as-determined basis (ad). Values are [C, H, O, N, S, ash, moisture].
+        Reported values for H and O exclude the H and O from moisture
+        content.
+    chem : ndarray
+        Chemical analysis data given as weight percent (wt. %) reported on a
+        dry basis (d). Values are [structural organics, non-structural
+        organics, water extractable, ethanol extractives, acetone
+        extractives, lignin, glucan, xylan, galactan, arabinan, mannan,
+        acetyl].
+    exp_yield: ndarray
+        Experimental yield data given as weight percent (wt. %) wet basis.
+        Values are [oil yield, condensables yield, light gas yield, water
+        vapor yield, char yield].
     """
 
     def __init__(self, data):
@@ -24,6 +35,7 @@ class Feedstock:
         self.prox = np.array(data['proximate'])
         self.ult = np.array(data['ultimate'])
         self.chem = np.array(data['chemical'])
+        self.exp_yield = np.array(data['yield'])
 
         # Assume 22 wt. % for air-dry loss (ADL) when calculating as-received
         # basis (ar) from the as-determined basis (ad)
@@ -189,3 +201,9 @@ class Feedstock:
         lig = chem_daf[5]
 
         return np.array([cell, hemi, lig])
+
+    def calc_norm_yield(self):
+        """
+        Calculate normalized values for the experimental yield data.
+        """
+        return self.exp_yield / sum(self.exp_yield) * 100
