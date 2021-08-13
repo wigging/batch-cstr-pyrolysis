@@ -1,5 +1,5 @@
 """
-Experimental yields for all FCIC feedstocks.
+Experimental and lumped yields for all FCIC feedstocks.
 """
 
 import json
@@ -17,15 +17,25 @@ feedstocks = [Feedstock(fd) for fd in fdata]
 # ----------------------------------------------------------------------------
 
 for f in feedstocks:
-    exp_norm = f.calc_norm_yield()
+    yields, norm_yields = f.calc_yields()
+    lumped = f.calc_lump_yields(norm_yields)
 
     print(
-        f'\n{" " + f.name + ", Cycle " + str(f.cycle) + " ":*^70}\n'
-        f'Given as wt. % wet      exp     norm\n'
-        f'oil yield          {f.exp_yield[0]:>8} {exp_norm[0]:>8.2f}\n'
-        f'condensables yield {f.exp_yield[1]:>8} {exp_norm[1]:>8.2f}\n'
-        f'light gas yield    {f.exp_yield[2]:>8} {exp_norm[2]:>8.2f}\n'
-        f'water vapor yield  {f.exp_yield[3]:>8} {exp_norm[3]:>8.2f}\n'
-        f'char yield         {f.exp_yield[4]:>8} {exp_norm[4]:>8.2f}\n'
-        f'total              {sum(f.exp_yield):>8.2f} {sum(exp_norm):>8.2f}'
+        f'\n{" " + f.name + ", Cycle " + str(f.cycle) + " ":*^70}\n\n'
+        f'Yields as wt. % wet     exp     norm\n'
+        f'oil yield          {yields[0]:>8} {norm_yields[0]:>8.2f}\n'
+        f'condensables yield {yields[1]:>8} {norm_yields[1]:>8.2f}\n'
+        f'light gas yield    {yields[2]:>8} {norm_yields[2]:>8.2f}\n'
+        f'water vapor yield  {yields[3]:>8} {norm_yields[3]:>8.2f}\n'
+        f'char yield         {yields[4]:>8} {norm_yields[4]:>8.2f}\n'
+        f'ash                {yields[5]:>8} {norm_yields[5]:>8.2f}\n'
+        f'total              {sum(yields):>8.2f} {sum(norm_yields):>8.2f}'
+    )
+
+    print(
+        f'\nLumped yields as wt. %\n'
+        f'gases     {lumped[0]:.2f}\n'
+        f'liquids   {lumped[1]:.2f}\n'
+        f'solids    {lumped[2]:.2f}\n'
+        f'total     {sum(lumped):.2f}'
     )

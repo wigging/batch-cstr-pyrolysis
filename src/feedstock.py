@@ -25,8 +25,7 @@ class Feedstock:
         acetyl].
     exp_yield: ndarray
         Experimental yield data given as weight percent (wt. %) wet basis.
-        Values are [oil yield, condensables yield, light gas yield, water
-        vapor yield, char yield].
+        Yeild values are [oil, condensables, light gas, water vapor, char].
     """
 
     def __init__(self, data):
@@ -192,7 +191,7 @@ class Feedstock:
     @staticmethod
     def calc_chem_bc(chem_daf):
         """
-        Calculate the biomass composition such that
+        Calculate the biomass composition from the chemical analysis data.
         cellulose = glucan
         hemicellulose = xylan + galactan + arabinan + mannan + acetyl
         """
@@ -202,8 +201,34 @@ class Feedstock:
 
         return np.array([cell, hemi, lig])
 
-    def calc_norm_yield(self):
+    def calc_yields(self):
         """
-        Calculate normalized values for the experimental yield data.
+        Calculate normalized values for the experimental yield data. Yield
+        values returned in order of [oil, condensables, light gas, water vapor, char, ash].
         """
-        return self.exp_yield / sum(self.exp_yield) * 100
+        oil = self.exp_yield[0]
+        condensable = self.exp_yield[1]
+        lightgas = self.exp_yield[2]
+        watervap = self.exp_yield[3]
+        char = self.exp_yield[4]
+        ash = self.prox[2]
+
+        yields = np.array([oil, condensable, lightgas, watervap, char, ash])
+        norm_yields = yields / sum(yields) * 100
+
+        return yields, norm_yields
+
+    @staticmethod
+    def calc_lump_yields(norm_yields):
+        """
+        Calculate the lumped yields for comparing to the reactor model yields.
+        Values returned in order of [gases, liquids, solids].
+        gases = light gases
+        liquids = oil + condensables + water vapor
+        solids = char + ash
+        """
+        gases = norm_yields[2]
+        liquids = norm_yields[0] + norm_yields[1] + norm_yields[3]
+        solids = norm_yields[4] + norm_yields[5]
+        lump_yields = np.array([gases, liquids, solids])
+        return lump_yields
