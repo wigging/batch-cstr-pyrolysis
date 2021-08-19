@@ -203,32 +203,41 @@ class Feedstock:
 
     def calc_yields(self):
         """
-        Calculate normalized values for the experimental yield data. Yield
-        values returned in order of [oil, condensables, light gas, water vapor, char, ash].
+        Return experimental yields array and calculate normalized yield values
+        from the experimental yield data. Yield values returned in order of
+        [oil, condensables, light gas, water vapor, char].
         """
         oil = self.exp_yield[0]
         condensable = self.exp_yield[1]
         lightgas = self.exp_yield[2]
         watervap = self.exp_yield[3]
         char = self.exp_yield[4]
-        ash = self.prox[2]
 
-        yields = np.array([oil, condensable, lightgas, watervap, char, ash])
-        norm_yields = yields / sum(yields) * 100
+        exp_yields = np.array([oil, condensable, lightgas, watervap, char])
+        norm_yields = exp_yields / sum(exp_yields) * 100
 
-        return yields, norm_yields
+        return exp_yields, norm_yields
 
     @staticmethod
-    def calc_lump_yields(norm_yields):
+    def calc_lump_yields(exp_yields, norm_yields):
         """
         Calculate the lumped yields for comparing to the reactor model yields.
-        Values returned in order of [gases, liquids, solids].
-        gases = light gases
-        liquids = oil + condensables + water vapor
-        solids = char + ash
+        Values returned in order of [gases, liquids, char] where
+            gases = light gases
+            liquids = oil + condensables + water vapor
+            char = char
         """
-        gases = norm_yields[2]
-        liquids = norm_yields[0] + norm_yields[1] + norm_yields[3]
-        solids = norm_yields[4] + norm_yields[5]
-        lump_yields = np.array([gases, liquids, solids])
-        return lump_yields
+
+        # Lumped groups using measured experiment yields
+        exp_gases = exp_yields[2]
+        exp_liquids = exp_yields[0] + exp_yields[1] + exp_yields[3]
+        exp_char = exp_yields[4]
+        exp_lumps = np.array([exp_gases, exp_liquids, exp_char])
+
+        # Lumped groups using normalized experiment yields
+        norm_gases = norm_yields[2]
+        norm_liquids = norm_yields[0] + norm_yields[1] + norm_yields[3]
+        norm_char = norm_yields[4]
+        norm_lumps = np.array([norm_gases, norm_liquids, norm_char])
+
+        return exp_lumps, norm_lumps
