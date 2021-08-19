@@ -8,8 +8,7 @@ reactions.
 Note
 ----
 The `debiagi_sw.cti` uses the original reaction rates from Debiagi 2018 while
-`debiagi_sw2.cti` uses modified rates for the metaplastic reactions such that
-b=1 instead of b=0 where b is the temperature exponent Tᵇ.
+`debiagi_sw_meta.cti` uses modified rates for the metaplastic reactions.
 
 References
 ----------
@@ -31,27 +30,19 @@ tk = 773.15                         # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
 time = np.linspace(0, 10.0, 100)    # reaction time steps [s]
 
-# Residues feedstock
+# Choose a feedstock and cti file
 
-# label = 'Residues, Cycle 1'
-# y0 = 'CELL:0.2846 GMSW:0.2228 LIGC:0.0014 LIGH:0.1160 LIGO:0.2509 TANN:0.0201 TGL:0.1043'
-# gas = ct.Solution('data/debiagi_sw.cti')
-
-# Stem wood feedstock
+label = 'Residues, Cycle 1'
+y0 = 'CELL:0.2846 GMSW:0.2228 LIGC:0.0014 LIGH:0.1160 LIGO:0.2509 TANN:0.0201 TGL:0.1043'
+gas = ct.Solution('data/debiagi_sw.cti')
 
 # label = 'Stem wood, Cycle 2'
 # y0 = 'CELL:0.3948 GMSW:0.2528 LIGC:0.0 LIGH:0.2589 LIGO:0.0437 TANN:0.0035 TGL:0.0463'
-# gas = ct.Solution('data/debiagi_sw2.cti')
-
-# Bark feedstock
+# gas = ct.Solution('data/debiagi_sw_meta.cti')
 
 # label = 'Bark, Cycle 3'
 # y0 = 'CELL:0.3383 GMSW:0.1838 LIGC:0.3190 LIGH:0.0023 LIGO:0.0252 TANN:0.0909 TGL:0.0405'
 # gas = ct.Solution('data/debiagi_sw.cti')
-
-label = 'Bark, Cycle 3 (LIG-C=0)'
-y0 = 'CELL:0.3383 GMSW:0.1838 LIGC:0.0 LIGH:0.1618 LIGO:0.1847 TANN:0.0909 TGL:0.0405'
-gas = ct.Solution('data/debiagi_sw.cti')
 
 # Cantera batch reactor
 # ----------------------------------------------------------------------------
