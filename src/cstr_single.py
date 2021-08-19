@@ -1,5 +1,21 @@
 """
-here
+Run a series of CSTR models for a single FCIC feedstock using the Debiagi 2018
+biomass pyrolysis kinetics. All reactions and chemical species are defined in
+Cantera `cti` files where `debiagi_sw.cti` is for softwood reactions,
+`debiagi_hw.cti` is for hardwood reactions, and `debiagi_gr.cti` is for grass
+reactions.
+
+Note
+----
+The `debiagi_sw.cti` uses the original reaction rates from Debiagi 2018 while
+`debiagi_sw2.cti` uses modified rates for the metaplastic reactions such that
+b=1 instead of b=0 where b is the temperature exponent Tᵇ.
+
+Reference
+---------
+P. Debiagi, G. Gentile, A. Cuoci, A. Frassoldati, E. Ranzi, and T. Faravelli.
+A predictive model of biochar formation and characterization. Journal of
+Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 """
 
 import cantera as ct
@@ -21,10 +37,11 @@ pabs = 101_325   # reactor absolute pressure [Pa]
 ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
-n_cstrs = 20     # number of CSTRs in series
+n_cstrs = 10     # number of CSTRs in series
 energy = 'off'   # reactor energy
 
 # biomass composition [cell, hemi, ligc, ligh, ligo, tann, tgl]
+bc_name = 'Residues, Cycle 1'
 bc = [0.2898, 0.2202, 0.0058, 0.0879, 0.2716, 0.0160, 0.1088]
 
 # Calculated parameters
@@ -137,7 +154,8 @@ print(
     f'length   {length} m\n'
     f'temp     {temp} K\n'
     f'pabs     {pabs:,} Pa\n'
-    f'n_cstrs  {n_cstrs}'
+    f'n_cstrs  {n_cstrs}\n'
+    f'feed     {bc_name}'
 )
 
 print(

@@ -1,15 +1,23 @@
-#
-# Biomass pyrolysis kinetic reactions for softwood based on Debiagi 2018.
-#
-# P. Debiagi, G. Gentile, A. Cuoci, A. Frassoldati, E. Ranzi, and T.
-# Faravelli. A predictive model of biochar formation and characterization.
-# Journal of Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
-#
-# species G{COH2} stiff is represented by GCOH2
-# species G{COH2} loose is represented by GCH2O
-#
-# flake8: noqa
+"""
+Biomass pyrolysis reactions for softwood based on the Debiagi 2018 kinetic
+scheme. Utilizes nitrogen gas as the fluidization medium for the NREL 2FBR
+pyrolysis reactor model. Metaplastic reactions are modified from the original
+scheme such that b=1 instead of b=0 where b is the temperature exponent Tᵇ.
+This improves conversion of the metaplastic species.
 
+Notes
+-----
+species G{COH2} stiff is represented by GCOH2
+species G{COH2} loose is represented by GCH2O
+
+Reference
+---------
+P. Debiagi, G. Gentile, A. Cuoci, A. Frassoldati, E. Ranzi, and T. Faravelli.
+A predictive model of biochar formation and characterization. Journal of
+Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
+"""
+
+# flake8: noqa
 
 # ----------------------------------------------------------------------------
 # Phases data
@@ -718,27 +726,27 @@ reaction("ITANN => 5 CHAR + 2 CO + H2O + 0.55 GCH2O + 0.45 GCOH2", [1.0e3, 0, 25
 
 # --- Metaplastic ---
 
-reaction("GCO2 => CO2", [1.0e6, 0, 24500])
+reaction("GCO2 => CO2", [1.0e6, 1, 24500])
 
-reaction("GCO => CO", [5.0e12, 0, 52500])
+reaction("GCO => CO", [5.0e12, 1, 52500])
 
-reaction("GCH3OH => CH3OH", [2.0e12, 0, 50000])
+reaction("GCH3OH => CH3OH", [2.0e12, 1, 50000])
 
 # GCH2O is G{COH2} loose
-reaction("GCH2O => 0.8 CHAR + 0.8 H2O + 0.2 CO + 0.2 H2", [6.0e10, 0, 50000])
+reaction("GCH2O => 0.8 CHAR + 0.8 H2O + 0.2 CO + 0.2 H2", [6.0e10, 1, 50000])
 
-reaction("GC2H6 => C2H6", [1.0e11, 0, 52000])
+reaction("GC2H6 => C2H6", [1.0e11, 1, 52000])
 
-reaction("GCH4 => CH4", [1.0e11, 0, 53000])
+reaction("GCH4 => CH4", [1.0e11, 1, 53000])
 
-reaction("GC2H4 => C2H4", [1.0e11, 0, 54000])
+reaction("GC2H4 => C2H4", [1.0e11, 1, 54000])
 
-reaction("GC6H5OH => C6H5OH", [1.5e12, 0, 55000])
+reaction("GC6H5OH => C6H5OH", [1.5e12, 1, 55000])
 
 # GCOH2 is G{COH2} stiff
-reaction("GCOH2 => 0.2 CHAR + 0.2 H2O + 0.8 CO + 0.8 H2", [1.0e9, 0, 59000])
+reaction("GCOH2 => 0.2 CHAR + 0.2 H2O + 0.8 CO + 0.8 H2", [1.0e9, 1, 59000])
 
-reaction("GH2 => H2", [1.8e8, 0, 70000])
+reaction("GH2 => H2", [1.8e8, 1, 70000])
 
 # --- Water Evaporation ---
 
