@@ -18,38 +18,64 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 """
 
 import cantera as ct
+import chemics as cm
+import json
 import matplotlib.pyplot as plt
 import numpy as np
+from feedstock import Feedstock
+from objfunc import objfunc
+from scipy.optimize import minimize
 
 ct.suppress_thermo_warnings()
 
 # Parameters
 # ----------------------------------------------------------------------------
 
-tk = 773.15                         # reactor temperature [K]
+temp = 773.15                       # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
-time = np.linspace(0, 10.0, 100)    # reaction time steps [s]
+time = np.linspace(0, 20.0, 100)    # reaction time steps [s]
+cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 
-# Choose a feedstock and cti file
+# Feedstock
+# ----------------------------------------------------------------------------
 
-label = 'Residues, Cycle 1'
-y0 = 'CELL:0.2846 GMSW:0.2228 LIGC:0.0014 LIGH:0.1160 LIGO:0.2509 TANN:0.0201 TGL:0.1043'
-gas = ct.Solution('data/debiagi_sw.cti')
+with open("data/feedstocks.json") as json_file:
+    fdata = json.load(json_file)
 
-# label = 'Stem wood, Cycle 2'
-# y0 = 'CELL:0.3948 GMSW:0.2528 LIGC:0.0 LIGH:0.2589 LIGO:0.0437 TANN:0.0035 TGL:0.0463'
-# gas = ct.Solution('data/debiagi_sw_meta.cti')
+feedstock = Feedstock(fdata[0])     # change index to choose feedstock
 
-# label = 'Bark, Cycle 3'
-# y0 = 'CELL:0.3383 GMSW:0.1838 LIGC:0.3190 LIGH:0.0023 LIGO:0.0252 TANN:0.0909 TGL:0.0405'
-# gas = ct.Solution('data/debiagi_sw.cti')
+# Biomass composition
+# ----------------------------------------------------------------------------
+
+# Get feedstock name, ultimate analysis data, and chemical analysis data
+ult_daf = feedstock.calc_ult_daf()
+ult_cho = feedstock.calc_ult_cho(ult_daf)
+chem_daf = feedstock.calc_chem_daf()
+chem_bc = feedstock.calc_chem_bc(chem_daf) / 100
+
+# C and H mass fractions from ultimate analysis data
+yc = ult_cho[0] / 100
+yh = ult_cho[1] / 100
+
+# Determine optimized splitting parameters using default values for `x0`
+# where each parameter is bound within 0 to 1
+x0 = [0.6, 0.8, 0.8, 1, 1]
+bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
+res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
+
+# Calculate biomass composition as dry ash-free basis (daf)
+bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
 
 # Cantera batch reactor
 # ----------------------------------------------------------------------------
 
-gas.TPY = tk, p, y0
-r = ct.IdealGasReactor(gas, energy='off')
+y0 = f'CELL:{cell} GMSW:{hemi} LIGC:{ligc} LIGH:{ligh} LIGO:{ligo} TANN:{tann} TGL:{tgl}'
 
+gas = ct.Solution(cti)
+gas.TPY = temp, p, y0
+
+r = ct.IdealGasReactor(gas, energy='off')
 sim = ct.ReactorNet([r])
 states = ct.SolutionArray(gas, extra=['t'])
 
@@ -58,7 +84,6 @@ for t in time:
     states.append(r.thermo.state, t=t)
 
 # Chemical species representing gas, liquid, solid, metaplastic phases
-
 sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2')
 
 sp_liquids = (
@@ -79,7 +104,6 @@ sp_metaplastics = (
 )
 
 # Sum of chemical species mass fractions at each time step
-
 y_gases = states(*sp_gases).Y.sum(axis=1)
 y_liquids = states(*sp_liquids).Y.sum(axis=1)
 y_solids = states(*sp_solids).Y.sum(axis=1)
@@ -89,20 +113,42 @@ y_metaplastics = states(*sp_metaplastics).Y.sum(axis=1)
 # ----------------------------------------------------------------------------
 
 print(
-    f'\n{" Batch reactor model ":*^60}\n\n'
-    f'Feedstock     {label}\n'
-    f'Final time    {time[-1]} s\n'
-    f'Temperature   {tk} K\n'
-    f'Pressure      {p:,} Pa'
+    f'\n{" Batch reactor model ":*^70}\n'
+    '\nParameters for reactor model\n'
+    f'feedstock     {feedstock.name + ", Cycle " + str(feedstock.cycle)}\n'
+    f'final time    {time[-1]} s\n'
+    f'temperature   {temp} K\n'
+    f'pressure      {p:,} Pa\n'
+    f'cti file      {cti}'
 )
 
-print('\nChemical species final yields as mass fraction, dry ash-free basis')
-print(f'Number of species = {len(states.species_names)}')
-for sp in states.species_names:
-    print(f"{sp:11} {states(sp).Y[:, 0][-1]:.4f}")
+print(
+    '\nUltimate analysis, wt. ％ CHO basis\n'
+    f'C         {yc * 100:.2f}\n'
+    f'H         {yh * 100:.2f}\n'
+    '\nOptimized splitting parameters\n'
+    f'α         {res.x[0]:.4f}\n'
+    f'β         {res.x[1]:.4f}\n'
+    f'γ         {res.x[2]:.4f}\n'
+    f'δ         {res.x[3]:.4f}\n'
+    f'ε         {res.x[4]:.4f}\n'
+    '\nChemical analysis, wt. ％ daf\n'
+    '           exp      opt\n'
+    f'cell      {chem_bc[0] * 100:.2f}    {cell * 100:.2f}\n'
+    f'hemi      {chem_bc[1] * 100:.2f}    {hemi * 100:.2f}\n'
+    f'lignin    {chem_bc[2] * 100:.2f}    {(ligc + ligh + ligo) * 100:.2f}\n'
+    '\nBiomass composition, wt. ％ daf\n'
+    f'cell      {cell * 100:.2f}\n'
+    f'hemi      {hemi * 100:.2f}\n'
+    f'lig-c     {ligc * 100:.2f}\n'
+    f'lig-h     {ligh * 100:.2f}\n'
+    f'lig-o     {ligo * 100:.2f}\n'
+    f'tann      {tann * 100:.2f}\n'
+    f'tgl       {tgl * 100:.2f}'
+)
 
 print(
-    '\nLumped species final yields as mass fraction, dry ash-free basis\n'
+    '\nLumped species final yields as wt. %\n'
     f'gases         {y_gases[-1] * 100:.2f}\n'
     f'liquids       {y_liquids[-1] * 100:.2f}\n'
     f'solids        {y_solids[-1] * 100:.2f}\n'
@@ -125,7 +171,6 @@ def style(ax, xlabel, ylabel, loc=None):
 
 
 # Initial biomass composition species
-
 fig, ax = plt.subplots(tight_layout=True)
 ax.plot(states.t, states('CELL').Y[:, 0], label='CELL')
 ax.plot(states.t, states('GMSW').Y[:, 0], label='GMSW')
@@ -139,7 +184,6 @@ ax.plot(states.t, states('TGL').Y[:, 0], label='TGL')
 style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]', loc='best')
 
 # Intermediate species
-
 fig, ax = plt.subplots(tight_layout=True)
 ax.plot(states.t, states('CELLA').Y[:, 0], label='CELLA')
 ax.plot(states.t, states('HCE1').Y[:, 0], label='HCE1')
@@ -150,7 +194,6 @@ ax.plot(states.t, states('LIG').Y[:, 0], label='LIG')
 style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]', loc='best')
 
 # Lumped species
-
 _, ax = plt.subplots(tight_layout=True)
 ax.plot(states.t, y_gases, label='gases')
 ax.plot(states.t, y_liquids, label='liquids')
@@ -159,13 +202,11 @@ ax.plot(states.t, y_metaplastics, label='metaplastics')
 style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]', loc='best')
 
 # Reactor temperature
-
 _, ax = plt.subplots(tight_layout=True)
 ax.plot(states.t, states.T, color='m')
 style(ax, xlabel='Time [s]', ylabel='Temperature [K]')
 
 # Final yield for all chemical species
-
 species = states.species_names
 ys = [states(sp).Y[:, 0][-1] for sp in species]
 ypos = np.arange(len(species))
@@ -183,7 +224,6 @@ ax.tick_params(color='0.8')
 ax.xaxis.grid(True, color='0.8')
 
 # Final yield for lumped species as gases, liquids, solids, metaplastics
-
 y_gas = np.arange(len(sp_gases))
 x_gas = states(*sp_gases).Y[-1]
 
