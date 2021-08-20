@@ -20,8 +20,12 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 
 import cantera as ct
 import chemics as cm
+import json
 import matplotlib.pyplot as plt
 import numpy as np
+from feedstock import Feedstock
+from objfunc import objfunc
+from scipy.optimize import minimize
 
 # Disable warnings about discontinuity at polynomial mid-point in thermo data.
 # Remove this line to show the warnings.
@@ -34,17 +38,47 @@ diam = 0.0525    # inner reactor diameter [m], 5.25 cm
 length = 0.4318  # total reactor length or height [m], 43.18 cm
 temp = 773.15    # reactor temperature [K]
 pabs = 101_325   # reactor absolute pressure [Pa]
+tau = 20         # residence time [s]
+
 ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
-n_cstrs = 10     # number of CSTRs in series
-energy = 'off'   # reactor energy
+n_cstrs = 1000                      # number of CSTRs in series
+energy = 'off'                      # reactor energy
+cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 
-# biomass composition [cell, hemi, ligc, ligh, ligo, tann, tgl]
-bc_name = 'Residues, Cycle 1'
-bc = [0.2898, 0.2202, 0.0058, 0.0879, 0.2716, 0.0160, 0.1088]
+# Feedstock
+# ----------------------------------------------------------------------------
 
-# Calculated parameters
+with open("data/feedstocks.json") as json_file:
+    fdata = json.load(json_file)
+
+feedstock = Feedstock(fdata[0])     # change index to choose feedstock
+
+# Biomass composition
+# ----------------------------------------------------------------------------
+
+# Get feedstock name, ultimate analysis data, and chemical analysis data
+ult_daf = feedstock.calc_ult_daf()
+ult_cho = feedstock.calc_ult_cho(ult_daf)
+chem_daf = feedstock.calc_chem_daf()
+chem_bc = feedstock.calc_chem_bc(chem_daf) / 100
+
+# C and H mass fractions from ultimate analysis data
+yc = ult_cho[0] / 100
+yh = ult_cho[1] / 100
+
+# Determine optimized splitting parameters using default values for `x0`
+# where each parameter is bound within 0 to 1
+x0 = [0.6, 0.8, 0.8, 1, 1]
+bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
+res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
+
+# Calculate biomass composition as dry ash-free basis (daf)
+bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
+
+# Reactor inputs
 # ----------------------------------------------------------------------------
 
 # Convert biomass feedrate from g/hr to kg/s
@@ -64,35 +98,34 @@ y_n2 = mf_n2 / (mf_n2 + mf_bio)
 # All mass fractions for reactor input
 y_all = {
     'N2': y_n2,
-    'CELL': bc[0],
-    'GMSW': bc[1],
-    'LIGC': bc[2],
-    'LIGH': bc[3],
-    'LIGO': bc[4],
-    'TANN': bc[5],
-    'TGL': bc[6]
+    'CELL': cell,
+    'GMSW': hemi,
+    'LIGC': ligc,
+    'LIGH': ligh,
+    'LIGO': ligo,
+    'TANN': tann,
+    'TGL': tgl
 }
 
-# CSTR model
+# Cantera CSTR model
 # ----------------------------------------------------------------------------
 
 # Setup gas phase
-gas = ct.Solution('data/debiagi_sw_n2.cti')
+gas = ct.Solution(cti)
 gas.TPY = temp, pabs, y_all
 
 # Create a stirred tank reactor (CSTR)
-cstr = ct.IdealGasConstPressureReactor(gas, energy=energy)
-
 dz = length / n_cstrs
 area = np.pi * (diam**2)
-cstr.volume = area * dz
+vol = area * dz
+cstr = ct.IdealGasConstPressureReactor(gas, energy=energy, volume=vol)
 
 # Reservoirs for the inlet and outlet of each CSTR
 inlet = ct.Reservoir(gas)
 outlet = ct.Reservoir(gas)
 
 # Mass flow rate into the CSTR
-mf = ct.MassFlowController(upstream=inlet, downstream=cstr, mdot=mf_n2 + mf_bio)
+mf = ct.MassFlowController(upstream=inlet, downstream=cstr, mdot=cstr.mass / tau)
 
 # Determine pressure in the CSTR
 ct.PressureController(upstream=cstr, downstream=outlet, master=mf, K=1e-5)
@@ -131,59 +164,70 @@ metaplastics = (
     'GH2', 'GC2H6'
 )
 
-# Mass fractions including nitrogen and biomass
+# Mass fractions including nitrogen and biomass (N₂ basis)
 y_n2 = states('N2').Y[:, 0]
 y_gas = states(*gases).Y.sum(axis=1)
 y_liquid = states(*liquids).Y.sum(axis=1)
 y_solid = states(*solids).Y.sum(axis=1)
 y_meta = states(*metaplastics).Y.sum(axis=1)
 
-# Mass fractions from only biomass (no nitrogen gas)
+# Mass fractions from only biomass (no nitrogen gas, N₂ free basis)
 sum_bio = y_gas + y_liquid + y_solid + y_meta - y_n2
 y_gas_bio = (y_gas - y_n2) / sum_bio
 y_liquid_bio = y_liquid / sum_bio
 y_solid_bio = y_solid / sum_bio
 y_meta_bio = y_meta / sum_bio
 
-# Print parameters and results
+# Print
 # ----------------------------------------------------------------------------
 
+print(f'\n{" CSTR model ":*^70}\n')
+
 print(
-    f'\n{" Parameters ":*^70}\n\n'
-    f'diam     {diam} m\n'
-    f'length   {length} m\n'
-    f'temp     {temp} K\n'
-    f'pabs     {pabs:,} Pa\n'
-    f'n_cstrs  {n_cstrs}\n'
-    f'feed     {bc_name}'
+    'Parameters for reactor model\n'
+    f'diam       {diam} m\n'
+    f'length     {length} m\n'
+    f'temp       {temp} K\n'
+    f'pabs       {pabs:,} Pa\n'
+    f'tau        {tau} s\n'
+    f'n_cstrs    {n_cstrs}\n'
+    f'energy     {energy}\n'
+    f'feed       {feedstock.name + ", Cycle " + str(feedstock.cycle)}\n'
+    f'cti file   {cti}\n'
 )
 
 print(
-    f'\n{" Calculated parameters ":*^70}\n\n'
+    'Calculated parameters\n'
     f'mf_bio   {mf_bio:.4g} kg/s\n'
-    f'mf_n2    {mf_n2:.4g} kg/s'
+    f'mf_n2    {mf_n2:.4g} kg/s\n'
+)
+
+y_total = y_gas[-1] + y_liquid[-1] + y_solid[-1] + y_meta[-1]
+y_total_bio = y_gas_bio[-1] + y_liquid_bio[-1] + y_solid_bio[-1] + y_meta_bio[-1]
+
+print(
+    'Exit mass fractions\n'
+    f'                N₂ basis   N₂ free\n'
+    f'gases         {y_gas[-1]:>8.4f} {y_gas_bio[-1]:>10.4f}\n'
+    f'liquids       {y_liquid[-1]:>8.4f} {y_liquid_bio[-1]:>10.4f}\n'
+    f'solids        {y_solid[-1]:>8.4f} {y_solid_bio[-1]:>10.4f}\n'
+    f'metaplastics  {y_meta[-1]:>8.4f} {y_meta_bio[-1]:>10.4f}\n'
+    f'total         {y_total:>8.2f} {y_total_bio:>10.2f}\n'
 )
 
 print(
-    f'\n{" Final mass fractions (N₂ basis) ":*^70}\n\n'
-    f'gas      {y_gas[-1]:.3f}\n'
-    f'liquid   {y_liquid[-1]:.3f}\n'
-    f'solid    {y_solid[-1]:.3f}\n'
-    f'meta     {y_meta[-1]:.3f}\n'
-    f'sum      {y_gas[-1] + y_liquid[-1] + y_solid[-1] + y_meta[-1]:.3f}'
-)
-
-print(
-    f'\n{" Final mass fractions (N₂ free basis) ":*^70}\n\n'
-    f'gas      {y_gas_bio[-1]:.3f}\n'
-    f'liquid   {y_liquid_bio[-1]:.3f}\n'
-    f'solid    {y_solid_bio[-1]:.3f}\n'
-    f'meta     {y_meta_bio[-1]:.3f}\n'
-    f'sum      {y_gas_bio[-1] + y_liquid_bio[-1] + y_solid_bio[-1] + y_meta_bio[-1]:.3f}'
+    'Exit yields wt. %\n'
+    f'                N₂ basis   N₂ free\n'
+    f'gases         {y_gas[-1] * 100:>8.2f} {y_gas_bio[-1] * 100:>10.2f}\n'
+    f'liquids       {y_liquid[-1] * 100:>8.2f} {y_liquid_bio[-1] * 100:>10.2f}\n'
+    f'solids        {y_solid[-1] * 100:>8.2f} {y_solid_bio[-1] * 100:>10.2f}\n'
+    f'metaplastics  {y_meta[-1] * 100:>8.2f} {y_meta_bio[-1] * 100:>10.2f}\n'
+    f'total         {y_total * 100:>8.2f} {y_total_bio * 100:>10.2f}\n\n'
+    f'total solids  {(y_solid[-1] + y_meta[-1]) * 100:>8.2f} {(y_solid_bio[-1] + y_meta_bio[-1]) * 100:>10.2f}'
 )
 
 
-# Plot results
+# Plot
 # ----------------------------------------------------------------------------
 
 def _config(ax, xlabel, ylabel, title=None, legend=None):
