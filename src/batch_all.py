@@ -1,10 +1,9 @@
 """
-Run a batch reactor model for every FCIC feedstock using the Debiagi 2018
+Run a batch reactor model for all FCIC feedstocks using the Debiagi 2018
 biomass pyrolysis kinetics. All reactions and chemical species are defined in
 Cantera `cti` files where `debiagi_sw.cti` is for softwood reactions,
 `debiagi_hw.cti` is for hardwood reactions, and `debiagi_gr.cti` is for grass
-reactions. Biomass compositions for each feedstock were determined from the
-`biocomp.py` file.
+reactions.
 
 Note
 ----
@@ -19,76 +18,77 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 """
 
 import cantera as ct
+import chemics as cm
+import json
 import matplotlib.pyplot as plt
 import numpy as np
+from feedstock import Feedstock
+from objfunc import objfunc
+from scipy.optimize import minimize
 
 ct.suppress_thermo_warnings()
 
 # Parameters
 # ----------------------------------------------------------------------------
 
-tk = 773.15                         # reactor temperature [K]
+temp = 773.15                       # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
-time = np.linspace(0, 10.0, 100)    # reaction time steps [s]
-cfile = 'data/debiagi_sw_meta.cti'  # Cantera input file
+time = np.linspace(0, 20.0, 100)    # reaction time steps [s]
+cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 
-# Feedstock biomass compositions
+# Feedstocks
+# ----------------------------------------------------------------------------
 
-feedstocks = [
-    {'name': 'residues', 'biocomp': [28.98, 22.02, 0.58, 8.79, 27.16, 1.60, 10.88], 'ash': 1.45},
-    {'name': 'stem wood', 'biocomp': [39.91, 25.42, 0.89, 26.20, 3.20, 0.01, 4.37], 'ash': 0.28},
-    {'name': 'bark', 'biocomp': [31.38, 22.99, 35.14, 0.0, 0.0, 7.15, 3.34], 'ash': 0.70},
-    {'name': 'needles', 'biocomp': [23.59, 17.57, 0.63, 5.43, 37.30, 3.00, 12.48], 'ash': 3.78},
-    {'name': 'bark + needles', 'biocomp': [23.91, 16.82, 6.94, 6.74, 34.53, 2.84, 8.22], 'ash': 2.52},
-    {'name': 'residues2', 'biocomp': [27.45, 20.81, 0.0, 3.71, 32.79, 1.98, 13.27], 'ash': 1.65}
-]
+with open("data/feedstocks.json") as json_file:
+    fdata = json.load(json_file)
 
-# Chemical species representing gas, liquid, solid, metaplastic phases
-
-sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2')
-
-sp_liquids = (
-    'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
-    'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H',
-    'CH3OH', 'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12',
-    'VANILLIN'
-)
-
-sp_solids = (
-    'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
-    'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR', 'ACQUA'
-)
-
-sp_metaplastics = (
-    'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
-    'GH2', 'GC2H6'
-)
+feedstocks = [Feedstock(fd) for fd in fdata]
 
 # Cantera batch reactor
 # ----------------------------------------------------------------------------
 
-gas = ct.Solution(cfile)
-
-n = len(feedstocks)
+# Store results for each feedstock
 names = []
-ash = np.zeros(n)
+n = len(feedstocks)
 yf_gases = np.zeros(n)
 yf_liquids = np.zeros(n)
 yf_solids = np.zeros(n)
 yf_metas = np.zeros(n)
+exp_gases = np.zeros(n)
+exp_liquids = np.zeros(n)
+exp_solids = np.zeros(n)
+exp_ash = np.zeros(n)
 
-print('\nLumped species final yields as mass fraction, dry ash-free basis\n')
-print('Feedstock              Gases    Liquids  Solids   Metaplastics')
+# Run batch reactor model for each feedstock
+for i, f in enumerate(feedstocks):
 
-for i, feed in enumerate(feedstocks):
+    # Get feedstock name, ultimate analysis data, and chemical analysis data
+    ult_daf = f.calc_ult_daf()
+    ult_cho = f.calc_ult_cho(ult_daf)
+    chem_daf = f.calc_chem_daf()
+    chem_bc = f.calc_chem_bc(chem_daf) / 100
 
-    bc = feed['biocomp']
-    y0 = np.array(bc) / 100
+    # C and H mass fractions from ultimate analysis data
+    yc = ult_cho[0] / 100
+    yh = ult_cho[1] / 100
 
-    y00 = f'CELL:{y0[0]} GMSW:{y0[1]} LIGC:{y0[2]} LIGH:{y0[3]} LIGO:{y0[4]} TANN:{y0[5]} TGL:{y0[6]}'
-    gas.TPY = tk, p, y00
+    # Determine optimized splitting parameters using default values for `x0`
+    # where each parameter is bound within 0 to 1
+    x0 = [0.6, 0.8, 0.8, 1, 1]
+    bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
+    res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
+
+    # Calculate biomass composition as dry ash-free basis (daf)
+    bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+    cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
+
+    # Perform batch reactor simulation
+    y0 = f'CELL:{cell} GMSW:{hemi} LIGC:{ligc} LIGH:{ligh} LIGO:{ligo} TANN:{tann} TGL:{tgl}'
+
+    gas = ct.Solution(cti)
+    gas.TPY = temp, p, y0
+
     r = ct.IdealGasReactor(gas, energy='off')
-
     sim = ct.ReactorNet([r])
     states = ct.SolutionArray(gas, extra=['t'])
 
@@ -96,20 +96,58 @@ for i, feed in enumerate(feedstocks):
         sim.advance(t)
         states.append(r.thermo.state, t=t)
 
+    # Chemical species representing gas, liquid, solid, metaplastic phases
+    sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2')
+
+    sp_liquids = (
+        'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
+        'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H',
+        'CH3OH', 'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12',
+        'VANILLIN'
+    )
+
+    sp_solids = (
+        'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
+        'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR', 'ACQUA'
+    )
+
+    sp_metaplastics = (
+        'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
+        'GH2', 'GC2H6'
+    )
+
+    # Sum of chemical species mass fractions at each time step
     y_gases = states(*sp_gases).Y.sum(axis=1)
     y_liquids = states(*sp_liquids).Y.sum(axis=1)
     y_solids = states(*sp_solids).Y.sum(axis=1)
     y_metaplastics = states(*sp_metaplastics).Y.sum(axis=1)
 
-    names.append(feed['name'])
-    ash[i] = feed['ash']
+    # Store results for feedstock
+    names.append(f.name)
     yf_gases[i] = y_gases[-1]
     yf_liquids[i] = y_liquids[-1]
     yf_solids[i] = y_solids[-1]
     yf_metas[i] = y_metaplastics[-1]
 
-    name = feed['name']
-    print(f'{name:20} {y_gases[-1]:8.4f} {y_liquids[-1]:8.4f} {y_solids[-1]:8.4f} {y_metaplastics[-1]:8.4f}')
+    # Experiment lumped yields
+    exp_yields, norm_yields = f.calc_yields()
+    exp_lumps, _ = f.calc_lump_yields(exp_yields, norm_yields)
+    exp_gases[i] = exp_lumps[0]
+    exp_liquids[i] = exp_lumps[1]
+    exp_solids[i] = exp_lumps[2]
+    exp_ash[i] = f.prox[2]
+
+# Print
+# ----------------------------------------------------------------------------
+
+print(
+    f'\n{" Batch reactor model ":*^70}\n'
+    '\nParameters for reactor model\n'
+    f'final time    {time[-1]} s\n'
+    f'temperature   {temp} K\n'
+    f'pressure      {p:,} Pa\n'
+    f'cti file      {cti}'
+)
 
 
 # Plot
@@ -125,98 +163,61 @@ def style_barh(ax):
 
 y = np.arange(n)
 
-_, ax = plt.subplots(tight_layout=True)
-ax.barh(y, yf_gases, color='C6')
-ax.set_yticks(y)
-ax.set_yticklabels(names)
-ax.set_xlabel('Mass fraction [-]')
-ax.set_title('Gases')
-style_barh(ax)
-
-_, ax = plt.subplots(tight_layout=True)
-ax.barh(y, yf_liquids, color='C4')
-ax.set_yticks(y)
-ax.set_yticklabels(names)
-ax.set_xlabel('Mass fraction [-]')
-ax.set_title('Liquids')
-style_barh(ax)
-
-_, ax = plt.subplots(tight_layout=True)
-ax.barh(y, yf_solids, color='C2')
-ax.set_yticks(y)
-ax.set_yticklabels(names)
-ax.set_xlabel('Mass fraction [-]')
-ax.set_title('Solids')
-style_barh(ax)
-
-_, ax = plt.subplots(tight_layout=True)
-ax.barh(y, yf_metas, color='C1')
-ax.set_yticks(y)
-ax.set_yticklabels(names)
-ax.set_xlabel('Mass fraction [-]')
-ax.set_title('Metaplastics')
-style_barh(ax)
-
-# ---
-
-_, ax = plt.subplots(tight_layout=True)
-b1 = ax.barh(y, yf_gases, color='C6', label='Gases')
-b2 = ax.barh(y, yf_liquids, left=yf_gases, color='C4', label='Liquids')
-b3 = ax.barh(y, yf_solids, left=yf_gases + yf_liquids, color='C2', label='Solids')
-b4 = ax.barh(y, yf_metas, left=yf_gases + yf_liquids + yf_solids, color='C1', label='Metaplastics')
-ax.bar_label(b1, label_type='center', fmt='%.2f')
-ax.bar_label(b2, label_type='center', fmt='%.2f')
-ax.bar_label(b3, label_type='center', fmt='%.2f')
-ax.bar_label(b4, label_type='center', fmt='%.2f')
+_, ax = plt.subplots(tight_layout=True, figsize=(9, 4.8))
+b1 = ax.barh(y, yf_gases * 100, color='C6', label='Gases')
+b2 = ax.barh(y, yf_liquids * 100, left=yf_gases * 100, color='C4', label='Liquids')
+b3 = ax.barh(y, yf_solids * 100, left=(yf_gases + yf_liquids) * 100, color='C2', label='Solids')
+b4 = ax.barh(y, yf_metas * 100, left=(yf_gases + yf_liquids + yf_solids) * 100, color='C1', label='Metaplastics')
+ax.bar_label(b1, label_type='center', fmt='%.1f')
+ax.bar_label(b2, label_type='center', fmt='%.1f')
+ax.bar_label(b3, label_type='center', fmt='%.1f')
+ax.bar_label(b4, label_type='center', fmt='%.1f')
 ax.legend(bbox_to_anchor=[0.5, 1.02], loc='center', ncol=4, frameon=False)
 ax.set_yticks(y)
 ax.set_yticklabels(names)
-ax.set_xlabel('Mass fraction [-]')
+ax.set_xlabel('Final yield [wt. %]')
 style_barh(ax)
 
 # ---
 
-# yf_gases2 = np.array([0.147, 0.141, 0.114, 0.145, 0.151])
-# yf_liquids2 = np.array([0.635, 0.723, 0.583, 0.554, 0.555])
-# yf_solids2 = np.array([0.152, 0.109, 0.319, 0.256, 0.165])
+h = 0.4
+yf_gases = yf_gases * 100
+yf_liquids = yf_liquids * 100
+yf_solids = yf_solids * 100
+yf_metas = yf_metas * 100
+yf_solidmeta = yf_solids + yf_metas
 
-# h = 0.40
+_, ax = plt.subplots(tight_layout=True, figsize=(9, 8))
 
-# _, ax = plt.subplots(tight_layout=True)
+b1 = ax.barh(y, yf_gases, edgecolor='k', height=h, color='C6', label='Gases')
+b2 = ax.barh(y, yf_liquids, edgecolor='k', left=yf_gases, height=h, color='C4', label='Liquids')
+b3 = ax.barh(y, yf_solidmeta, edgecolor='k', left=yf_gases + yf_liquids, height=h, color='C2', label='Solids')
 
-# b1 = ax.barh(y, yf_gases, height=h, color='C6', label='Gases')
-# e1 = ax.barh(y + h, yf_gases2, height=h, color='C6', alpha=0.5)
+e1 = ax.barh(y + h, exp_gases, edgecolor='k', height=h, color='C6')
+e2 = ax.barh(y + h, exp_liquids, edgecolor='k', height=h, left=exp_gases, color='C4')
+e3 = ax.barh(y + h, exp_solids, edgecolor='k', height=h, left=exp_gases + exp_liquids, color='C2')
 
-# b2 = ax.barh(y, yf_liquids, height=h, left=yf_gases, color='C4', label='Liquids')
-# e2 = ax.barh(y + h, yf_liquids2, height=h, left=yf_gases2, color='C4', alpha=0.5)
+ax.bar_label(b1, label_type='center', fmt='%.1f')
+ax.bar_label(e1, label_type='center', fmt='%.1f')
+ax.bar_label(b2, label_type='center', fmt='%.1f')
+ax.bar_label(e2, label_type='center', fmt='%.1f')
+ax.bar_label(b3, label_type='center', fmt='%.1f')
+ax.bar_label(e3, label_type='center', fmt='%.1f')
 
-# b3 = ax.barh(y, yf_solids, height=h, left=yf_gases + yf_liquids, color='C2', label='Solids')
-# e3 = ax.barh(y + h, yf_solids2, height=h, left=yf_gases2 + yf_liquids2, color='C2', alpha=0.5)
-
-# b4 = ax.barh(y, yf_metas, height=h, left=yf_gases + yf_liquids + yf_solids, color='C1', label='Metaplastics')
-
-# ax.bar_label(b1, label_type='center', fmt='%.2f')
-# ax.bar_label(e1, label_type='center', fmt='%.2f')
-# ax.bar_label(b2, label_type='center', fmt='%.2f')
-# ax.bar_label(e2, label_type='center', fmt='%.2f')
-# ax.bar_label(b3, label_type='center', fmt='%.2f')
-# ax.bar_label(e3, label_type='center', fmt='%.2f')
-# ax.bar_label(b4, label_type='center', fmt='%.2f')
-
-# ax.legend(bbox_to_anchor=[0.5, 1.02], loc='center', ncol=4, frameon=False)
-# ax.set_yticks(y + h / 2)
-# ax.set_yticklabels(names)
-# ax.set_xlabel('Mass fraction [-]')
-# style_barh(ax)
+ax.legend(bbox_to_anchor=[0.5, 1.02], loc='center', ncol=3, frameon=False)
+ax.set_yticks(y + h / 2)
+ax.set_yticklabels(names)
+ax.set_xlabel('Final yield [wt. %]')
+style_barh(ax)
 
 # ---
 
-z = np.polyfit(ash, yf_liquids, 1)
+z = np.polyfit(exp_ash, yf_liquids, 1)
 p = np.poly1d(z)
 
 _, ax = plt.subplots()
-ax.plot(ash, yf_liquids * 100, 'o')
-ax.plot(ash, p(ash) * 100)
+ax.plot(exp_ash, yf_liquids, 'o')
+ax.plot(exp_ash, p(exp_ash))
 ax.set_xlabel('Ash [wt. %]')
 ax.set_ylabel('Liquids [wt. %]')
 
