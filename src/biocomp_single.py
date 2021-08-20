@@ -1,90 +1,120 @@
 """
 Determine the biomass composition for a given FCIC feedstock using ultimate
-analysis data and splitting parameters. The splitting parameter values are
-obtained from `biocomp_all` results.
+analysis data and chemical analysis data. The splitting parameter values are
+obtained using an optimization function and comparing the results to the
+measured chemical analysis data.
 """
 
-import matplotlib.pyplot as plt
 import chemics as cm
+import json
+import matplotlib.pyplot as plt
+from feedstock import Feedstock
+from scipy.optimize import minimize
 
-# Feedstock parameters
+
+# Objective function
 # ----------------------------------------------------------------------------
 
-# Default splitting parameters are α = 0.6, β = 0.8, γ = 0.8, δ = 1, ε = 1
+def objfunc(x, yc, yh, chem):
+    """
+    Objective function for determining the biomass composition splitting
+    parameters by minimizing the difference between the estimated composition
+    and the composition from chemical analysis data.
 
-# name = 'Residues'
-# yc = 0.5331
-# yh = 0.0641
-# alpha = 0.5175
-# beta = 0.8996
-# gamma = 1
-# delta = 0.6486
-# epsilon = 0.9246
+    Parameters
+    ----------
+    x : list
+        Splitting parameter values as [α, β, γ, δ, ε]
+    yc : float
+        Mass fraction of carbon from ultimate analysis CHO basis
+    yh : float
+        Mass fraction of hydrogen from ultimate analysis CHO basis
+    chem : ndarray
+        Chemical analysis data as [cellulose, hemicellulose, lignin]
 
-# name = 'Stem wood'
-# yc = 0.5094
-# yh = 0.0639
-# alpha = 0.5613
-# beta = 0.9810
-# gamma = 0.7683
-# delta = 0.9263
-# epsilon = 0.9958
+    Returns
+    -------
+    float
+        Value returned from ∑(y - z)² where y is cell, hemi, total lig
+        estimated from biomass composition and z is cell, hemi, lig from
+        chemical analysis data.
 
-name = 'Bark'
-yc = 0.5569
-yh = 0.0589
-alpha = 0.5265
-beta = 0.3359
-gamma = 0.0
-delta = 0.0
-epsilon = 0.8527
+    Note
+    ----
+    Default splitting parameters are α = 0.6, β = 0.8, γ = 0.8, δ = 1, ε = 1.
+    """
+    alpha, beta, gamma, delta, epsilon = x
+    cell_data, hemi_data, lig_data = chem
+
+    bc = cm.biocomp(yc, yh, alpha=alpha, beta=beta, gamma=gamma, delta=delta, epsilon=epsilon)
+    cell, hemi, ligc, ligh, ligo, _, _ = bc['y_daf']
+    lig = ligc + ligh + ligo
+
+    return (cell - cell_data)**2 + (hemi - hemi_data)**2 + (lig - lig_data)**2
+
+
+# Feedstock
+# ----------------------------------------------------------------------------
+
+with open("data/feedstocks.json") as json_file:
+    fdata = json.load(json_file)
+
+feedstock = Feedstock(fdata[0])
 
 # Biomass composition
 # ----------------------------------------------------------------------------
 
-bc = cm.biocomp(yc, yh, alpha=alpha, beta=beta, gamma=gamma, delta=delta, epsilon=epsilon)
+# Get feedstock name, ultimate analysis data, and chemical analysis data
+name = feedstock.name
+ult_daf = feedstock.calc_ult_daf()
+ult_cho = feedstock.calc_ult_cho(ult_daf)
+chem_daf = feedstock.calc_chem_daf()
+chem_bc = feedstock.calc_chem_bc(chem_daf) / 100
 
-cell = bc['y_daf'][0]
-hemi = bc['y_daf'][1]
-ligc = bc['y_daf'][2]
-ligh = bc['y_daf'][3]
-ligo = bc['y_daf'][4]
-tann = bc['y_daf'][5]
-tgl = bc['y_daf'][6]
-total = cell + hemi + ligc + ligh + ligo + tann + tgl
-total_lig = sum(bc['y_daf'][2:5])
+# C and H mass fractions from ultimate analysis data
+yc = ult_cho[0] / 100
+yh = ult_cho[1] / 100
 
-# Print parameters
+# Determine optimized splitting parameters using default values for `x0`
+# where each parameter is bound within 0 to 1
+x0 = [0.6, 0.8, 0.8, 1, 1]
+bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
+res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
+
+# Calculate biomass composition as dry ash-free basis (daf)
+bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
+
+# Print
 # ----------------------------------------------------------------------------
 
 print(
-    f'\nParameters for {name} \n'
-    f'C = {yc * 100} \n'
-    f'H = {yh * 100} \n'
-    f'α = {alpha} \n'
-    f'β = {beta} \n'
-    f'γ = {gamma} \n'
-    f'δ = {delta} \n'
-    f'ε = {epsilon} \n'
+    f'\n{" " + name + ", Cycle " + str(feedstock.cycle) + " ":*^70}\n'
+    '\nUltimate analysis, wt. ％ CHO basis\n'
+    f'C         {yc * 100:.2f}\n'
+    f'H         {yh * 100:.2f}\n'
+    '\nOptimized splitting parameters\n'
+    f'α         {res.x[0]:.4f}\n'
+    f'β         {res.x[1]:.4f}\n'
+    f'γ         {res.x[2]:.4f}\n'
+    f'δ         {res.x[3]:.4f}\n'
+    f'ε         {res.x[4]:.4f}\n'
+    '\nChemical analysis, wt. ％ daf\n'
+    '           exp      opt\n'
+    f'cell      {chem_bc[0] * 100:.2f}    {cell * 100:.2f}\n'
+    f'hemi      {chem_bc[1] * 100:.2f}    {hemi * 100:.2f}\n'
+    f'lignin    {chem_bc[2] * 100:.2f}    {(ligc + ligh + ligo) * 100:.2f}\n'
+    '\nBiomass composition, wt. ％ daf\n'
+    f'cell      {cell * 100:.2f}\n'
+    f'hemi      {hemi * 100:.2f}\n'
+    f'lig-c     {ligc * 100:.2f}\n'
+    f'lig-h     {ligh * 100:.2f}\n'
+    f'lig-o     {ligo * 100:.2f}\n'
+    f'tann      {tann * 100:.2f}\n'
+    f'tgl       {tgl * 100:.2f}'
 )
 
-# Print biomass composition as mass fraction, dry ash-free basis (daf)
-# ----------------------------------------------------------------------------
-
-print(
-    'Biomass composition    daf \n'
-    f'cellulose             {cell * 100:8>.2f} \n'
-    f'hemicellulose         {hemi * 100:8>.2f} \n'
-    f'lignin-c              {ligc * 100:8>.2f} \n'
-    f'lignin-h              {ligh * 100:8>.2f} \n'
-    f'lignin-o              {ligo * 100:8>.2f} \n'
-    f'tannins               {tann * 100:8>.2f} \n'
-    f'triglycerides         {tgl * 100:8>.2f} \n'
-    f'total                 {total * 100:8>.2f} \n'
-    f'total lignin          {total_lig * 100:8>.2f}'
-)
-
-# Plot the reference mixtures
+# Plot
 # ----------------------------------------------------------------------------
 
 fig, ax = plt.subplots(tight_layout=True)
