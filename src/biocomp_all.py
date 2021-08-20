@@ -1,6 +1,8 @@
 """
 Determine the biomass composition for all given FCIC feedstocks using ultimate
-analysis data, chemical analysis data, and optimized splitting parameters.
+analysis data and chemical analysis data. The splitting parameter values are
+obtained using an optimization function and comparing the results to the
+measured chemical analysis data.
 """
 
 import chemics as cm
