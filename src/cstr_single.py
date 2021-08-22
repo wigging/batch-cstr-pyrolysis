@@ -8,8 +8,8 @@ reactions.
 Note
 ----
 The `debiagi_sw.cti` uses the original reaction rates from Debiagi 2018 while
-`debiagi_sw2.cti` uses modified rates for the metaplastic reactions such that
-b=1 instead of b=0 where b is the temperature exponent Tᵇ.
+`debiagi_sw_metan2.cti` uses modified rates for the metaplastic reactions
+such that b=1 instead of b=0 where b is the temperature exponent Tᵇ.
 
 Reference
 ---------
@@ -24,8 +24,6 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 from feedstock import Feedstock
-from objfunc import objfunc
-from scipy.optimize import minimize
 
 # Disable warnings about discontinuity at polynomial mid-point in thermo data.
 # Remove this line to show the warnings.
@@ -58,25 +56,12 @@ feedstock = Feedstock(fdata[0])     # change index to choose feedstock
 # Biomass composition
 # ----------------------------------------------------------------------------
 
-# Get feedstock name, ultimate analysis data, and chemical analysis data
-ult_daf = feedstock.calc_ult_daf()
-ult_cho = feedstock.calc_ult_cho(ult_daf)
-chem_daf = feedstock.calc_chem_daf()
-chem_bc = feedstock.calc_chem_bc(chem_daf) / 100
-
-# C and H mass fractions from ultimate analysis data
-yc = ult_cho[0] / 100
-yh = ult_cho[1] / 100
-
-# Determine optimized splitting parameters using default values for `x0`
-# where each parameter is bound within 0 to 1
-x0 = [0.6, 0.8, 0.8, 1, 1]
-bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
-res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
-
-# Calculate biomass composition as dry ash-free basis (daf)
-bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+# Calculate optimized biomass composition (daf) and splitting parameters
+bc, splits = feedstock.calc_biocomp()
 cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
+
+# Get feedstock moisture content as mass fraction
+yh2o = feedstock.prox_ad[3] / 100
 
 # Reactor inputs
 # ----------------------------------------------------------------------------
@@ -96,23 +81,15 @@ mf_n2 = lpm_n2 / 60_000 * rhog_n2
 y_n2 = mf_n2 / (mf_n2 + mf_bio)
 
 # All mass fractions for reactor input
-y_all = {
-    'N2': y_n2,
-    'CELL': cell,
-    'GMSW': hemi,
-    'LIGC': ligc,
-    'LIGH': ligh,
-    'LIGO': ligo,
-    'TANN': tann,
-    'TGL': tgl
-}
+y0_all = {'N2': y_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
+          'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
 # Cantera CSTR model
 # ----------------------------------------------------------------------------
 
 # Setup gas phase
 gas = ct.Solution(cti)
-gas.TPY = temp, pabs, y_all
+gas.TPY = temp, pabs, y0_all
 
 # Create a stirred tank reactor (CSTR)
 dz = length / n_cstrs
@@ -185,6 +162,7 @@ print(f'\n{" CSTR model ":*^70}\n')
 
 print(
     'Parameters for reactor model\n'
+    f'feed       {feedstock.name + ", Cycle " + str(feedstock.cycle)}\n'
     f'diam       {diam} m\n'
     f'length     {length} m\n'
     f'temp       {temp} K\n'
@@ -192,7 +170,6 @@ print(
     f'tau        {tau} s\n'
     f'n_cstrs    {n_cstrs}\n'
     f'energy     {energy}\n'
-    f'feed       {feedstock.name + ", Cycle " + str(feedstock.cycle)}\n'
     f'cti file   {cti}\n'
 )
 
