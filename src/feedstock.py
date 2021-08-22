@@ -55,9 +55,20 @@ class Feedstock:
     ADL : int
         Assume 22 wt. % for air-dry loss (ADL) when calculating as-received
         basis (ar) from the as-determined basis (ad).
-    exp_yield: ndarray
-        Experimental yield data given as weight percent (wt. %) wet basis.
-        Yeild values are [oil, condensables, light gas, water vapor, char].
+    exp_yield : ndarray
+        Experimental yield data reported on a wet basis. Values are
+        [oil, condensables, light gas, water vapor, char] in units of weight
+        percent (wt. %).
+    normexp_yield : ndarray
+        Normalized experimental yield data on a wet basis. Values are
+        [oil, condensables, light gas, water vapor, char] in units of weight
+        percent (wt. %).
+    lump_yield : ndarray
+        Lumped yields from measured experiment yield data. Values are
+        [gases, liquids, solids] in units of weight percent (wt. %).
+    normlump_yield : ndarray
+        Normalized lumped yields from normalized experiment yield data. Values
+        are [gases, liquids, solids] in units of weight percent (wt. %).
     """
 
     def __init__(self, data):
@@ -75,10 +86,16 @@ class Feedstock:
         self.chem_d = np.array(data['chemical'])
         self.ADL = 22
         self.exp_yield = np.array(data['yield'])
+        self.normexp_yield = np.array(data['yield']) / sum(np.array(data['yield'])) * 100
+        self.lump_yield = None
+        self.normlump_yield = None
 
         # Calculate proximate and ultimate analysis bases
         self._prox_bases()
         self._ult_bases()
+
+        # Calculate lumped yields from experiment yield data
+        self._lump_yields()
 
     def _prox_bases(self):
         # Get as-determined (ad) values
@@ -157,6 +174,23 @@ class Feedstock:
         O_cho = O_daf * 100 / (100 - N_daf - S_daf)
         self.ult_cho = np.array([C_cho, H_cho, O_cho])
 
+    def _lump_yields(self):
+        # Calculate lumped yields from measured experiment yield data where
+        # experiment yields = [oil, condensables, light gas, water vapor, char]
+        # lump gases = light gases
+        # lump liquids = oil + condensables + water vapor
+        # lump solids = char
+        gases = self.exp_yield[2]
+        liquids = self.exp_yield[0] + self.exp_yield[1] + self.exp_yield[3]
+        solids = self.exp_yield[4]
+        self.lump_yield = np.array([gases, liquids, solids])
+
+        # Calculate normalized lumped yields from normalized experiment yield data.
+        norm_gases = self.normexp_yield[2]
+        norm_liquids = self.normexp_yield[0] + self.normexp_yield[1] + self.normexp_yield[3]
+        norm_solids = self.normexp_yield[4]
+        self.normlump_yield = np.array([norm_gases, norm_liquids, norm_solids])
+
     def calc_chem_daf(self):
         """
         Calculate the chemical analysis dry ash-free basis (daf) from the dry
@@ -181,44 +215,3 @@ class Feedstock:
         lig = chem_daf[5]
 
         return np.array([cell, hemi, lig])
-
-    def calc_yields(self):
-        """
-        Return experimental yields array and calculate normalized yield values
-        from the experimental yield data. Yield values returned in order of
-        [oil, condensables, light gas, water vapor, char].
-        """
-        oil = self.exp_yield[0]
-        condensable = self.exp_yield[1]
-        lightgas = self.exp_yield[2]
-        watervap = self.exp_yield[3]
-        char = self.exp_yield[4]
-
-        exp_yields = np.array([oil, condensable, lightgas, watervap, char])
-        norm_yields = exp_yields / sum(exp_yields) * 100
-
-        return exp_yields, norm_yields
-
-    @staticmethod
-    def calc_lump_yields(exp_yields, norm_yields):
-        """
-        Calculate the lumped yields for comparing to the reactor model yields.
-        Values returned in order of [gases, liquids, char] where
-            gases = light gases
-            liquids = oil + condensables + water vapor
-            char = char
-        """
-
-        # Lumped groups using measured experiment yields
-        exp_gases = exp_yields[2]
-        exp_liquids = exp_yields[0] + exp_yields[1] + exp_yields[3]
-        exp_char = exp_yields[4]
-        exp_lumps = np.array([exp_gases, exp_liquids, exp_char])
-
-        # Lumped groups using normalized experiment yields
-        norm_gases = norm_yields[2]
-        norm_liquids = norm_yields[0] + norm_yields[1] + norm_yields[3]
-        norm_char = norm_yields[4]
-        norm_lumps = np.array([norm_gases, norm_liquids, norm_char])
-
-        return exp_lumps, norm_lumps

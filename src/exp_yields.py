@@ -1,5 +1,6 @@
 """
-Experimental and lumped yields for all FCIC feedstocks.
+Experimental yield data and calculated lumped yields for all FCIC feedstocks.
+Compare experiment yields to feedstock ash content.
 """
 
 import json
@@ -23,32 +24,34 @@ char = []
 oil = []
 liquids = []
 
-for f in feedstocks:
-    exp_yields, norm_yields = f.calc_yields()
-    exp_lumps, norm_lumps = f.calc_lump_yields(exp_yields, norm_yields)
+for feedstock in feedstocks:
+    exp_yield = feedstock.exp_yield
+    normexp_yield = feedstock.normexp_yield
+    lump_yield = feedstock.lump_yield
+    normlump_yield = feedstock.normlump_yield
 
-    ash.append(f.prox[2])
-    char.append(exp_yields[4])
-    oil.append(exp_yields[0])
-    liquids.append(exp_lumps[1])
+    ash.append(feedstock.prox_ad[2])
+    char.append(exp_yield[4])
+    oil.append(exp_yield[0])
+    liquids.append(lump_yield[1])
 
     print(
-        f'\n{" " + f.name + ", Cycle " + str(f.cycle) + " ":*^70}\n\n'
+        f'\n{" " + feedstock.name + ", Cycle " + str(feedstock.cycle) + " ":*^70}\n\n'
         f'Yields as wt. % wet     exp     norm\n'
-        f'oil                {exp_yields[0]:>8} {norm_yields[0]:>8.2f}\n'
-        f'condensables       {exp_yields[1]:>8} {norm_yields[1]:>8.2f}\n'
-        f'light gas          {exp_yields[2]:>8} {norm_yields[2]:>8.2f}\n'
-        f'water vapor        {exp_yields[3]:>8} {norm_yields[3]:>8.2f}\n'
-        f'char               {exp_yields[4]:>8} {norm_yields[4]:>8.2f}\n'
-        f'total              {sum(exp_yields):>8.2f} {sum(norm_yields):>8.2f}'
+        f'oil                {exp_yield[0]:>8} {normexp_yield[0]:>8.2f}\n'
+        f'condensables       {exp_yield[1]:>8} {normexp_yield[1]:>8.2f}\n'
+        f'light gas          {exp_yield[2]:>8} {normexp_yield[2]:>8.2f}\n'
+        f'water vapor        {exp_yield[3]:>8} {normexp_yield[3]:>8.2f}\n'
+        f'char               {exp_yield[4]:>8} {normexp_yield[4]:>8.2f}\n'
+        f'total              {sum(exp_yield):>8.2f} {sum(normexp_yield):>8.2f}'
     )
 
     print(
         f'\nLump yields as wt. %    exp     norm\n'
-        f'gases              {exp_lumps[0]:>8.2f} {norm_lumps[0]:>8.2f}\n'
-        f'liquids            {exp_lumps[1]:>8.2f} {norm_lumps[1]:>8.2f}\n'
-        f'char               {exp_lumps[2]:>8.2f} {norm_lumps[2]:>8.2f}\n'
-        f'total              {sum(exp_lumps):>8.2f} {sum(norm_lumps):>8.2f}'
+        f'gases              {lump_yield[0]:>8.2f} {normlump_yield[0]:>8.2f}\n'
+        f'liquids            {lump_yield[1]:>8.2f} {normlump_yield[1]:>8.2f}\n'
+        f'char               {lump_yield[2]:>8.2f} {normlump_yield[2]:>8.2f}\n'
+        f'total              {sum(lump_yield):>8.2f} {sum(normlump_yield):>8.2f}'
     )
 
 
@@ -80,7 +83,7 @@ style(ax1)
 
 ax2.plot(ash, char, 'o')
 ax2.plot(ash, p2(ash))
-ax2.set_xlabel('Experiment ash [wt. %]')
+ax2.set_xlabel('Feedstock ash [wt. %]')
 ax2.set_title('Char')
 style(ax2)
 
