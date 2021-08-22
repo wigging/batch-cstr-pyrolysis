@@ -18,14 +18,13 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 """
 
 import cantera as ct
-import chemics as cm
 import json
 import matplotlib.pyplot as plt
 import numpy as np
 from feedstock import Feedstock
-from objfunc import objfunc
-from scipy.optimize import minimize
 
+# Disable warnings about discontinuity at polynomial mid-point in thermo data.
+# Remove this line to show the warnings.
 ct.suppress_thermo_warnings()
 
 # Parameters
@@ -34,6 +33,8 @@ ct.suppress_thermo_warnings()
 temp = 773.15                       # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
 time = np.linspace(0, 20.0, 100)    # reaction time steps [s]
+
+energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 
 # Feedstocks
@@ -60,35 +61,23 @@ exp_solids = np.zeros(n)
 exp_ash = np.zeros(n)
 
 # Run batch reactor model for each feedstock
-for i, f in enumerate(feedstocks):
+for i, feedstock in enumerate(feedstocks):
 
-    # Get feedstock name, ultimate analysis data, and chemical analysis data
-    ult_daf = f.calc_ult_daf()
-    ult_cho = f.calc_ult_cho(ult_daf)
-    chem_daf = f.calc_chem_daf()
-    chem_bc = f.calc_chem_bc(chem_daf) / 100
-
-    # C and H mass fractions from ultimate analysis data
-    yc = ult_cho[0] / 100
-    yh = ult_cho[1] / 100
-
-    # Determine optimized splitting parameters using default values for `x0`
-    # where each parameter is bound within 0 to 1
-    x0 = [0.6, 0.8, 0.8, 1, 1]
-    bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
-    res = minimize(objfunc, x0, args=(yc, yh, chem_bc), method='L-BFGS-B', bounds=bnds)
-
-    # Calculate biomass composition as dry ash-free basis (daf)
-    bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+    # Calculate optimized biomass composition (daf) and splitting parameters
+    bc, splits = feedstock.calc_biocomp()
     cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
 
+    # Get feedstock moisture content as mass fraction
+    yh2o = feedstock.prox_ad[3] / 100
+
     # Perform batch reactor simulation
-    y0 = f'CELL:{cell} GMSW:{hemi} LIGC:{ligc} LIGH:{ligh} LIGO:{ligo} TANN:{tann} TGL:{tgl}'
+    y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
+          'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
     gas = ct.Solution(cti)
     gas.TPY = temp, p, y0
 
-    r = ct.IdealGasReactor(gas, energy='off')
+    r = ct.IdealGasReactor(gas, energy=energy)
     sim = ct.ReactorNet([r])
     states = ct.SolutionArray(gas, extra=['t'])
 
@@ -123,19 +112,17 @@ for i, f in enumerate(feedstocks):
     y_metaplastics = states(*sp_metaplastics).Y.sum(axis=1)
 
     # Store results for feedstock
-    names.append(f.name)
+    names.append(feedstock.name)
     yf_gases[i] = y_gases[-1]
     yf_liquids[i] = y_liquids[-1]
     yf_solids[i] = y_solids[-1]
     yf_metas[i] = y_metaplastics[-1]
 
     # Experiment lumped yields
-    exp_yields, norm_yields = f.calc_yields()
-    exp_lumps, _ = f.calc_lump_yields(exp_yields, norm_yields)
-    exp_gases[i] = exp_lumps[0]
-    exp_liquids[i] = exp_lumps[1]
-    exp_solids[i] = exp_lumps[2]
-    exp_ash[i] = f.prox[2]
+    exp_gases[i] = feedstock.lump_yield[0]
+    exp_liquids[i] = feedstock.lump_yield[1]
+    exp_solids[i] = feedstock.lump_yield[2]
+    exp_ash[i] = feedstock.prox_ad[2]
 
 # Print
 # ----------------------------------------------------------------------------
@@ -146,6 +133,7 @@ print(
     f'final time    {time[-1]} s\n'
     f'temperature   {temp} K\n'
     f'pressure      {p:,} Pa\n'
+    f'energy        {energy}\n'
     f'cti file      {cti}'
 )
 
