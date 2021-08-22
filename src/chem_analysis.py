@@ -63,9 +63,6 @@ for i, f in enumerate(feedstocks):
     )
 
 # Max weight percent difference for dry basis
-
-# FIX: need to get chemical analysis data for cycle 15 and cycle 16, last two feedstocks
-
 wt_max = [max(col) - min(col) for col in chems_d[:-2].T]
 
 print(f'\n{" Max wt. ％ difference (d) ":*^70}\n')
@@ -85,7 +82,8 @@ print(
 )
 
 
-# Plot comparison of chemical analysis values
+# Plot
+# ----------------------------------------------------------------------------
 
 def style(ax):
     ax.grid(color='0.9')
