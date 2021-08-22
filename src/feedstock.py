@@ -47,11 +47,20 @@ class Feedstock:
         Ultimate analysis CHO basis. Values are [C, H, O] in units of weight
         percent (wt. %).
     chem_d : ndarray
-        Chemical analysis data given as weight percent (wt. %) reported on a
-        dry basis (d). Values are [structural organics, non-structural
-        organics, water extractable, ethanol extractives, acetone
-        extractives, lignin, glucan, xylan, galactan, arabinan, mannan,
-        acetyl].
+        Chemical analysis data reported on a dry basis (d). Values are
+        [structural organics, non-structural organics, water extractable,
+        ethanol extractives, acetone extractives, lignin, glucan, xylan,
+        galactan, arabinan, mannan, acetyl] in units of weight percent
+        (wt. %).
+    chem_daf : ndarray
+        Chemical analysis dry ash-free basis (daf). Values are [0, 0, water
+        extractable, ethanol extractives, acetone extractives, lignin,
+        glucan, xylan, galactan, arabinan, mannan, acetyl] in units of weight
+        percent(wt. %).
+    chem_bc : ndarray
+        Biomass composition calculated from the reported chemical analysis
+        data. Values are [cellulose, hemicellulose, lignin] in units of
+        weight percent (wt. %).
     ADL : int
         Assume 22 wt. % for air-dry loss (ADL) when calculating as-received
         basis (ar) from the as-determined basis (ad).
@@ -84,6 +93,8 @@ class Feedstock:
         self.ult_daf = None
         self.ult_cho = None
         self.chem_d = np.array(data['chemical'])
+        self.chem_daf = None
+        self.chem_bc = None
         self.ADL = 22
         self.exp_yield = np.array(data['yield'])
         self.normexp_yield = np.array(data['yield']) / sum(np.array(data['yield'])) * 100
@@ -96,6 +107,9 @@ class Feedstock:
 
         # Calculate lumped yields from experiment yield data
         self._lump_yields()
+
+        # Calculate chemical analysis bases
+        self._chem_bases()
 
     def _prox_bases(self):
         # Get as-determined (ad) values
@@ -191,27 +205,20 @@ class Feedstock:
         norm_solids = self.normexp_yield[4]
         self.normlump_yield = np.array([norm_gases, norm_liquids, norm_solids])
 
-    def calc_chem_daf(self):
-        """
-        Calculate the chemical analysis dry ash-free basis (daf) from the dry
-        basis in units of weight percent (wt. %).
-        """
-        chem_d = self.chem
-        tot_d = sum(chem_d)
-        chem_daf = chem_d * 100 / (tot_d - chem_d[0] - chem_d[1])
+    def _chem_bases(self):
+        # Calculate the chemical analysis dry ash-free basis (daf) from the
+        # dry basis in units of weight percent (wt. %).
+        chem_d = self.chem_d
+        total_d = sum(chem_d)
+        chem_daf = chem_d * 100 / (total_d - chem_d[0] - chem_d[1])
         chem_daf[0:2] = 0
+        self.chem_daf = chem_daf
 
-        return chem_daf
-
-    @staticmethod
-    def calc_chem_bc(chem_daf):
-        """
-        Calculate the biomass composition from the chemical analysis data.
-        cellulose = glucan
-        hemicellulose = xylan + galactan + arabinan + mannan + acetyl
-        """
+        # Calculate the biomass composition from chemical analysis dry
+        # ash-free basis (daf) where
+        # cellulose = glucan
+        # hemicellulose = xylan + galactan + arabinan + mannan + acetyl
         cell = chem_daf[6]
         hemi = chem_daf[7] + chem_daf[8] + chem_daf[9] + chem_daf[10] + chem_daf[11]
         lig = chem_daf[5]
-
-        return np.array([cell, hemi, lig])
+        self.chem_bc = np.array([cell, hemi, lig])

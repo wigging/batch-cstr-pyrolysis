@@ -13,43 +13,45 @@ from feedstock import Feedstock
 
 np.set_printoptions(precision=4, suppress=True)
 
-# Get feedstock data from JSON file and create Feedstock objects
+# Feedstock
+# ----------------------------------------------------------------------------
 
 with open("data/feedstocks.json") as json_file:
     fdata = json.load(json_file)
 
-feeds = [Feedstock(fd) for fd in fdata]
+feedstocks = [Feedstock(fd) for fd in fdata]
 
-# Chemical analysis values for each feedstock
+# Chemical analysis
+# ----------------------------------------------------------------------------
 
-n = len(feeds)
-chems = np.zeros((n, 12))
+n = len(feedstocks)
+chems_d = np.zeros((n, 12))
 
-for i, f in enumerate(feeds):
-    chems[i] = f.chem
-    chem_daf = f.calc_chem_daf()
-    biocomp = f.calc_chem_bc(chem_daf)
+for i, f in enumerate(feedstocks):
+    chems_d[i] = f.chem_d
+    chem_daf = f.chem_daf
+    biocomp = f.chem_bc
 
-    tot_d = sum(f.chem)
-    tot_daf = sum(chem_daf)
-    tot_bio = sum(biocomp)
+    total_d = sum(f.chem_d)
+    total_daf = sum(chem_daf)
+    total_bio = sum(biocomp)
 
     print(f'\n{" " + f.name + ", Cycle " + str(f.cycle) + " ":*^70}\n')
     print(
         'Chemical analysis wt. %        d      daf \n'
-        f'structural inorganics     {f.chem[0]:>8} \n'
-        f'non-structural inorganics {f.chem[1]:>8} \n'
-        f'water extractives         {f.chem[2]:>8}{chem_daf[2]:>8.2f} \n'
-        f'ethanol extractives       {f.chem[3]:>8}{chem_daf[3]:>8.2f} \n'
-        f'acetone extractives       {f.chem[4]:>8}{chem_daf[4]:>8.2f} \n'
-        f'lignin                    {f.chem[5]:>8}{chem_daf[5]:>8.2f} \n'
-        f'glucan                    {f.chem[6]:>8}{chem_daf[6]:>8.2f} \n'
-        f'xylan                     {f.chem[7]:>8}{chem_daf[7]:>8.2f} \n'
-        f'galactan                  {f.chem[8]:>8}{chem_daf[8]:>8.2f} \n'
-        f'arabinan                  {f.chem[9]:>8}{chem_daf[9]:>8.2f} \n'
-        f'mannan                    {f.chem[10]:>8}{chem_daf[10]:>8.2f} \n'
-        f'acetyl                    {f.chem[11]:>8}{chem_daf[11]:>8.2f} \n'
-        f'total                     {tot_d:>8.2f}{tot_daf:>8.2f}'
+        f'structural inorganics     {f.chem_d[0]:>8} \n'
+        f'non-structural inorganics {f.chem_d[1]:>8} \n'
+        f'water extractives         {f.chem_d[2]:>8}{chem_daf[2]:>8.2f} \n'
+        f'ethanol extractives       {f.chem_d[3]:>8}{chem_daf[3]:>8.2f} \n'
+        f'acetone extractives       {f.chem_d[4]:>8}{chem_daf[4]:>8.2f} \n'
+        f'lignin                    {f.chem_d[5]:>8}{chem_daf[5]:>8.2f} \n'
+        f'glucan                    {f.chem_d[6]:>8}{chem_daf[6]:>8.2f} \n'
+        f'xylan                     {f.chem_d[7]:>8}{chem_daf[7]:>8.2f} \n'
+        f'galactan                  {f.chem_d[8]:>8}{chem_daf[8]:>8.2f} \n'
+        f'arabinan                  {f.chem_d[9]:>8}{chem_daf[9]:>8.2f} \n'
+        f'mannan                    {f.chem_d[10]:>8}{chem_daf[10]:>8.2f} \n'
+        f'acetyl                    {f.chem_d[11]:>8}{chem_daf[11]:>8.2f} \n'
+        f'total                     {total_d:>8.2f}{total_daf:>8.2f}'
     )
 
     print(
@@ -57,14 +59,14 @@ for i, f in enumerate(feeds):
         f'cellulose                 {biocomp[0]:>8.2f} \n'
         f'hemicellulose             {biocomp[1]:>8.2f} \n'
         f'lignin                    {biocomp[2]:>8.2f} \n'
-        f'total                     {tot_bio:>8.2f}'
+        f'total                     {total_bio:>8.2f}'
     )
 
 # Max weight percent difference for dry basis
 
 # FIX: need to get chemical analysis data for cycle 15 and cycle 16, last two feedstocks
 
-wt_max = [max(col) - min(col) for col in chems[:-2].T]
+wt_max = [max(col) - min(col) for col in chems_d[:-2].T]
 
 print(f'\n{" Max wt. ％ difference (d) ":*^70}\n')
 print(
@@ -98,7 +100,7 @@ labels = [
 
 _, ax = plt.subplots(tight_layout=True)
 
-for c in chems:
+for c in chems_d:
     ax.plot(c, 'o')
 ax.set_ylabel('Weight % (as-determined)')
 ax.set_xlabel('Chemical analysis')
