@@ -1,4 +1,7 @@
+import chemics as cm
 import numpy as np
+from objfunc import objfunc
+from scipy.optimize import minimize
 
 
 class Feedstock:
@@ -59,8 +62,9 @@ class Feedstock:
         percent(wt. %).
     chem_bc : ndarray
         Biomass composition calculated from the reported chemical analysis
-        data. Values are [cellulose, hemicellulose, lignin] in units of
-        weight percent (wt. %).
+        data on a dry ash-free basis (daf). Values are given as
+        [cellulose, hemicellulose, lignin] in units of weight percent
+        (wt. %).
     ADL : int
         Assume 22 wt. % for air-dry loss (ADL) when calculating as-received
         basis (ar) from the as-determined basis (ad).
@@ -215,10 +219,37 @@ class Feedstock:
         self.chem_daf = chem_daf
 
         # Calculate the biomass composition from chemical analysis dry
-        # ash-free basis (daf) where
+        # ash-free basis (daf) values where
         # cellulose = glucan
         # hemicellulose = xylan + galactan + arabinan + mannan + acetyl
         cell = chem_daf[6]
         hemi = chem_daf[7] + chem_daf[8] + chem_daf[9] + chem_daf[10] + chem_daf[11]
         lig = chem_daf[5]
         self.chem_bc = np.array([cell, hemi, lig])
+
+    def calc_biocomp(self):
+        """
+        Calculate the optimized splitting parameters and associated biomass
+        composition (daf) of the feedstock.
+        """
+
+        # Get mass fractions for ultimate analysis data
+        # Get mass fractions of biomass composition from chemical analysis data
+        yc = self.ult_cho[0] / 100
+        yh = self.ult_cho[1] / 100
+        ybc = self.chem_bc / 100
+
+        # Determine optimized splitting parameters using default values for `x0`
+        # where each parameter is bound within 0 to 1
+        x0 = [0.6, 0.8, 0.8, 1, 1]
+        bnds = ((0, 1), (0, 1), (0, 1), (0, 1), (0, 1))
+        res = minimize(objfunc, x0, args=(yc, yh, ybc), method='L-BFGS-B', bounds=bnds)
+
+        # Calculate biomass composition as dry ash-free basis (daf)
+        bc = cm.biocomp(yc, yh, alpha=res.x[0], beta=res.x[1], gamma=res.x[2], delta=res.x[3], epsilon=res.x[4])
+        cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
+
+        # Optimized splitting parameters in order of [alpha, beta, gamma, delta, epsilon]
+        splits = np.array([res.x[0], res.x[1], res.x[2], res.x[3], res.x[4]])
+
+        return bc, splits
