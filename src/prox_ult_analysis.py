@@ -41,6 +41,8 @@ for i, feedstock in enumerate(feedstocks):
     ult_daf = feedstock.ult_daf
     ult_cho = feedstock.ult_cho
 
+    sum_ult_ad = sum(ult_ad) - ult_ad[6]  # exclude moisture content
+
     print(f'\n{" " + feedstock.name + ", Cycle " + str(feedstock.cycle) + " ":*^70}\n')
 
     print('Proximate analysis wt. %')
@@ -52,16 +54,16 @@ for i, feedstock in enumerate(feedstocks):
     print(f'Σ {sum(prox_ad):>11.2f} {sum(prox_ar):>10.2f} {sum(prox_d):>10.2f} {sum(prox_daf):>10.2f}')
 
     print('\nUltimate analysis wt. %')
-    print('reported H and O for ad-basis excludes H and O in moisture')
-    print(f'{"ad":>11} {"ar":>10} {"d":>10} {"daf":>10} {"cho":>10}')
+    print('★ reported H and O for ad-basis excludes H and O in moisture')
+    print(f'{"ad":>10} {"ar":>10} {"d":>10} {"daf":>10} {"cho":>10}')
     print(f'C {ult_ad[0]:>9.2f} {ult_ar[0]:>10.2f} {ult_d[0]:>10.2f} {ult_daf[0]:>10.2f} {ult_cho[0]:>10.2f}')
     print(f'H {ult_ad[1]:>9.2f} {ult_ar[1]:>10.2f} {ult_d[1]:>10.2f} {ult_daf[1]:>10.2f} {ult_cho[1]:>10.2f}')
     print(f'O {ult_ad[2]:>9.2f} {ult_ar[2]:>10.2f} {ult_d[2]:>10.2f} {ult_daf[2]:>10.2f} {ult_cho[2]:>10.2f}')
     print(f'N {ult_ad[3]:>9.2f} {ult_ar[3]:>10.2f} {ult_d[3]:>10.2f} {ult_daf[3]:>10.2f}')
     print(f'S {ult_ad[4]:>9.2f} {ult_ar[4]:>10.2f} {ult_d[4]:>10.2f} {ult_daf[4]:>10.2f}')
     print(f'ash {ult_ad[5]:>7.2f} {ult_ar[5]:>10.2f} {ult_d[5]:>10.2f}')
-    print(f'M {ult_ad[6]:>9.2f} {ult_ar[6]:>10.2f}')
-    print(f'Σ {sum(ult_ad):>9.2f} {sum(ult_ar):>10.2f} {sum(ult_d):>10.2f} {sum(ult_daf):>10.2f} {sum(ult_cho):>10.2f}')
+    print(f'M {ult_ad[6]:>9.2f}★ {ult_ar[6]:>9.2f}')
+    print(f'Σ {sum_ult_ad:>9.2f} {sum(ult_ar):>10.2f} {sum(ult_d):>10.2f} {sum(ult_daf):>10.2f} {sum(ult_cho):>10.2f}')
 
 # Max weight percent difference for FC, VM, ash, moisture for as-determined basis
 wt_max = [max(col) - min(col) for col in proxs_ad.T]
