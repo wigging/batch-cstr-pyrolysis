@@ -198,15 +198,46 @@ ax.set_yticklabels(names)
 ax.set_xlabel('Final yield [wt. %]')
 style_barh(ax)
 
+
 # ---
 
-z = np.polyfit(exp_ash, yf_liquids, 1)
-p = np.poly1d(z)
+def style(ax):
+    ax.grid(color='0.9')
+    ax.tick_params(color='0.9')
 
-_, ax = plt.subplots()
-ax.plot(exp_ash, yf_liquids, 'o')
-ax.plot(exp_ash, p(exp_ash))
-ax.set_xlabel('Ash [wt. %]')
-ax.set_ylabel('Liquids [wt. %]')
+
+pfit_gas_model = np.poly1d(np.polyfit(exp_ash, yf_gases, 1))
+pfit_gas_exp = np.poly1d(np.polyfit(exp_ash, exp_gases, 1))
+
+pfit_liq_model = np.poly1d(np.polyfit(exp_ash, yf_liquids, 1))
+pfit_liq_exp = np.poly1d(np.polyfit(exp_ash, exp_liquids, 1))
+
+pfit_sld_model = np.poly1d(np.polyfit(exp_ash, yf_solids, 1))
+pfit_sld_exp = np.poly1d(np.polyfit(exp_ash, exp_solids, 1))
+
+_, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, figsize=(4.8, 8), sharex=True, tight_layout=True)
+
+ax1.plot(exp_ash, yf_gases, 'ro', label='model')
+ax1.plot(exp_ash, pfit_gas_model(exp_ash), 'r')
+ax1.plot(exp_ash, exp_gases, 'ko', label='exp')
+ax1.plot(exp_ash, pfit_gas_exp(exp_ash), 'k')
+ax1.set_ylabel('Gases [wt. %]')
+style(ax1)
+
+ax2.plot(exp_ash, yf_liquids, 'ro', label='model')
+ax2.plot(exp_ash, pfit_liq_model(exp_ash), 'r')
+ax2.plot(exp_ash, exp_liquids, 'ko', label='exp')
+ax2.plot(exp_ash, pfit_liq_exp(exp_ash), 'k')
+ax2.set_ylabel('Liquids [wt. %]')
+ax2.legend(loc='best')
+style(ax2)
+
+ax3.plot(exp_ash, yf_solids, 'ro', label='model')
+ax3.plot(exp_ash, pfit_sld_model(exp_ash), 'r')
+ax3.plot(exp_ash, exp_solids, 'ko', label='exp')
+ax3.plot(exp_ash, pfit_sld_exp(exp_ash), 'k')
+ax3.set_xlabel('Ash [wt. %]')
+ax3.set_ylabel('Solids [wt. %]')
+style(ax3)
 
 plt.show()
