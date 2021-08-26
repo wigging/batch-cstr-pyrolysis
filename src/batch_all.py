@@ -122,6 +122,9 @@ for i, feedstock in enumerate(feedstocks):
     exp_gases[i] = feedstock.lump_yield[0]
     exp_liquids[i] = feedstock.lump_yield[1]
     exp_solids[i] = feedstock.lump_yield[2]
+    # exp_gases[i] = feedstock.lump2_yield[0]
+    # exp_liquids[i] = feedstock.lump2_yield[1]
+    # exp_solids[i] = feedstock.lump2_yield[2]
     exp_ash[i] = feedstock.prox_ad[2]
 
 # Print

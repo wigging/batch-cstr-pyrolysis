@@ -79,6 +79,9 @@ class Feedstock:
     lump_yield : ndarray
         Lumped yields from measured experiment yield data. Values are
         [gases, liquids, solids] in units of weight percent (wt. %).
+    lump2_yield : ndarray
+        Lumped yields from measured experiment yield data. Values are
+        [gases, liquids, solids] in units of weight percent (wt. %).
     normlump_yield : ndarray
         Normalized lumped yields from normalized experiment yield data. Values
         are [gases, liquids, solids] in units of weight percent (wt. %).
@@ -103,6 +106,7 @@ class Feedstock:
         self.exp_yield = np.array(data['yield'])
         self.normexp_yield = np.array(data['yield']) / sum(np.array(data['yield'])) * 100
         self.lump_yield = None
+        self.lump2_yield = None
         self.normlump_yield = None
 
         # Calculate proximate and ultimate analysis bases
@@ -195,13 +199,22 @@ class Feedstock:
     def _lump_yields(self):
         # Calculate lumped yields from measured experiment yield data where
         # experiment yields = [oil, condensables, light gas, water vapor, char]
-        # lump gases = light gases
-        # lump liquids = oil + condensables + water vapor
-        # lump solids = char
+        # gases = light gas
+        # liquids = oil + condensables + water vapor
+        # solids = char
         gases = self.exp_yield[2]
         liquids = self.exp_yield[0] + self.exp_yield[1] + self.exp_yield[3]
         solids = self.exp_yield[4]
         self.lump_yield = np.array([gases, liquids, solids])
+
+        # Another approach to lump the experiment yields as the following
+        # gases = light gas + condensables + water vapor
+        # liquids = oil
+        # solids = char
+        gases = self.exp_yield[2] + self.exp_yield[1] + self.exp_yield[3]
+        liquids = self.exp_yield[0]
+        solids = self.exp_yield[4]
+        self.lump2_yield = np.array([gases, liquids, solids])
 
         # Calculate normalized lumped yields from normalized experiment yield data.
         norm_gases = self.normexp_yield[2]
