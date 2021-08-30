@@ -98,6 +98,10 @@ y_liquid = y_liquid_n2 / sum_no_n2
 y_solid = y_solid_n2 / sum_no_n2
 y_metaplastic = y_metaplastic_n2 / sum_no_n2
 
+# Carbon, hydrogen, and oxygen fractions
+yc_gases, yh_gases, yo_gases = rct.get_ycho_gases(states)
+yc_liquids, yh_liquids, yo_liquids = rct.get_ycho_liquids(states)
+
 # Print
 # ----------------------------------------------------------------------------
 
@@ -144,6 +148,14 @@ print(
     f'metaplastic   {y_metaplastic_n2[-1] * 100:>8.2f} {y_metaplastic[-1] * 100:>10.2f}\n'
     f'total         {y_total_n2 * 100:>8.2f} {y_total * 100:>10.2f}\n\n'
     f'total solids  {(y_solid_n2[-1] + y_metaplastic_n2[-1]) * 100:>8.2f} {(y_solid[-1] + y_metaplastic[-1]) * 100:>10.2f}'
+)
+
+print(
+    '\nFinal mixture CHO fractions (N₂ basis)\n'
+    '       gas   liquid\n'
+    f'yc    {yc_gases.sum(axis=1)[-1]:.2f}     {yc_liquids.sum(axis=1)[-1]:.2f}\n'
+    f'yh    {yh_gases.sum(axis=1)[-1]:.2f}     {yh_liquids.sum(axis=1)[-1]:.2f}\n'
+    f'yo    {yo_gases.sum(axis=1)[-1]:.2f}     {yo_liquids.sum(axis=1)[-1]:.2f}'
 )
 
 

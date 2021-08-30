@@ -77,10 +77,20 @@ y0_n2 = mf_n2 / (mf_n2 + mf_bio)
 # Store results for each feedstock
 names = []
 nf = len(feedstocks)
+
 yf_gases = np.zeros(nf)
 yf_liquids = np.zeros(nf)
 yf_solids = np.zeros(nf)
 yf_metas = np.zeros(nf)
+
+ycf_gas = np.zeros(nf)
+yhf_gas = np.zeros(nf)
+yof_gas = np.zeros(nf)
+
+ycf_liquid = np.zeros(nf)
+yhf_liquid = np.zeros(nf)
+yof_liquid = np.zeros(nf)
+
 exp_gases = np.zeros(nf)
 exp_liquids = np.zeros(nf)
 exp_solids = np.zeros(nf)
@@ -95,35 +105,47 @@ for i, feedstock in enumerate(feedstocks):
     cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
 
     # Get feedstock moisture content as mass fraction
-    yh2o = feedstock.prox_ad[3] / 100
+    y0_h2o = feedstock.prox_ad[3] / 100
 
     # All mass fractions for reactor input
     y0 = {'N2': y0_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
-          'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
+          'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': y0_h2o}
 
     # Run CSTR simulation
     states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0)
 
-    # Mass fractions including nitrogen and biomass (N₂ basis)
+    # Mass fractions of phases and nitrogen gas in each CSTR (N₂ basis)
     y_n2 = states('N2').Y[:, 0]
-    y_gas = states(*rct.sp_gases_n2).Y.sum(axis=1)
-    y_liquid = states(*rct.sp_liquids).Y.sum(axis=1)
-    y_solid = states(*rct.sp_solids).Y.sum(axis=1)
-    y_meta = states(*rct.sp_metaplastics).Y.sum(axis=1)
+    y_gas_n2 = states(*rct.sp_gases_n2).Y.sum(axis=1)
+    y_liquid_n2 = states(*rct.sp_liquids).Y.sum(axis=1)
+    y_solid_n2 = states(*rct.sp_solids).Y.sum(axis=1)
+    y_metaplastic_n2 = states(*rct.sp_metaplastics).Y.sum(axis=1)
 
-    # Mass fractions from only biomass (no nitrogen gas, N₂ free basis)
-    sum_bio = y_gas + y_liquid + y_solid + y_meta - y_n2
-    y_gas_bio = (y_gas - y_n2) / sum_bio
-    y_liquid_bio = y_liquid / sum_bio
-    y_solid_bio = y_solid / sum_bio
-    y_meta_bio = y_meta / sum_bio
+    # Mass fractions of the phases excluding nitrogen gas in each CSTR (N₂ free basis)
+    sum_no_n2 = y_gas_n2 + y_liquid_n2 + y_solid_n2 + y_metaplastic_n2 - y_n2
+    y_gas = (y_gas_n2 - y_n2) / sum_no_n2
+    y_liquid = y_liquid_n2 / sum_no_n2
+    y_solid = y_solid_n2 / sum_no_n2
+    y_metaplastic = y_metaplastic_n2 / sum_no_n2
+
+    # Carbon, hydrogen, and oxygen fractions in gas phase (N₂ basis)
+    yc_gases, yh_gases, yo_gases = rct.get_ycho_gases(states)
+    ycf_gas[i] = yc_gases.sum(axis=1)[-1]
+    yhf_gas[i] = yh_gases.sum(axis=1)[-1]
+    yof_gas[i] = yo_gases.sum(axis=1)[-1]
+
+    # Carbon, hydrogen, and oxygen fractions in liquid phase (N₂ basis)
+    yc_liquids, yh_liquids, yo_liquids = rct.get_ycho_liquids(states)
+    ycf_liquid[i] = yc_liquids.sum(axis=1)[-1]
+    yhf_liquid[i] = yh_liquids.sum(axis=1)[-1]
+    yof_liquid[i] = yo_liquids.sum(axis=1)[-1]
 
     # Store exit yields for feedstock
     names.append(feedstock.name)
-    yf_gases[i] = y_gas_bio[-1]
-    yf_liquids[i] = y_liquid_bio[-1]
-    yf_solids[i] = y_solid_bio[-1]
-    yf_metas[i] = y_meta_bio[-1]
+    yf_gases[i] = y_gas[-1]
+    yf_liquids[i] = y_liquid[-1]
+    yf_solids[i] = y_solid[-1]
+    yf_metas[i] = y_metaplastic[-1]
 
     # Experiment lumped yields
     exp_gases[i] = feedstock.lump2_yield[0]
@@ -208,6 +230,48 @@ ax.set_yticks(y + h / 2)
 ax.set_yticklabels(names)
 ax.set_xlabel('Final yield [wt. %]')
 style_barh(ax)
+
+# ---
+
+_, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(9, 4.8), sharey=True, tight_layout=True)
+
+ax1.barh(y, ycf_gas, color='C6')
+ax1.set_xlabel('Carbon')
+ax1.set_yticks(y)
+ax1.set_yticklabels(names)
+style_barh(ax1)
+
+ax2.barh(y, yhf_gas, color='C6')
+ax2.set_xlabel('Hydrogen')
+ax2.set_title('Gas phase CHO fractions (N₂ basis)')
+ax2.set_yticks(y)
+style_barh(ax2)
+
+ax3.barh(y, yof_gas, color='C6')
+ax3.set_xlabel('Oxygen')
+ax3.set_yticks(y)
+style_barh(ax3)
+
+# ---
+
+_, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(9, 4.8), sharey=True, tight_layout=True)
+
+ax1.barh(y, ycf_liquid, color='C4')
+ax1.set_xlabel('Carbon')
+ax1.set_yticks(y)
+ax1.set_yticklabels(names)
+style_barh(ax1)
+
+ax2.barh(y, yhf_liquid, color='C4')
+ax2.set_xlabel('Hydrogen')
+ax2.set_title('Liquid phase CHO fractions (N₂ basis)')
+ax2.set_yticks(y)
+style_barh(ax2)
+
+ax3.barh(y, yof_liquid, color='C4')
+ax3.set_xlabel('Oxygen')
+ax3.set_yticks(y)
+style_barh(ax3)
 
 
 # ---
