@@ -9,19 +9,24 @@ import numpy as np
 # Remove this line to show the warnings.
 ct.suppress_thermo_warnings()
 
-# Chemical species representing gas, liquid, solid, metaplastic phases
-# Notice `N2` is added to the gases to include inlet fluidization gas flow
-sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2', 'N2')
+# Chemical species representing gas phase
+sp_gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2')
 
+# Chemical species representing gas phase including nitrogen for fluidization
+sp_gases_n2 = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2', 'N2')
+
+# Chemical species representing liquid phase
 sp_liquids = (
     'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
     'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H', 'CH3OH',
     'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12', 'VANILLIN')
 
+# Chemical species representing solid phase
 sp_solids = (
     'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
     'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR', 'ACQUA')
 
+# Chemical species representing metaplastic phase
 sp_metaplastics = (
     'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
     'GH2', 'GC2H6')

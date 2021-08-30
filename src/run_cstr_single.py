@@ -86,7 +86,7 @@ states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0)
 
 # Mass fractions of phases and nitrogen gas in each CSTR (N₂ basis)
 y_n2 = states('N2').Y[:, 0]
-y_gas_n2 = states(*rct.sp_gases).Y.sum(axis=1)
+y_gas_n2 = states(*rct.sp_gases_n2).Y.sum(axis=1)
 y_liquid_n2 = states(*rct.sp_liquids).Y.sum(axis=1)
 y_solid_n2 = states(*rct.sp_solids).Y.sum(axis=1)
 y_metaplastic_n2 = states(*rct.sp_metaplastics).Y.sum(axis=1)

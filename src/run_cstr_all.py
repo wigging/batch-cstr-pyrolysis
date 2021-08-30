@@ -106,7 +106,7 @@ for i, feedstock in enumerate(feedstocks):
 
     # Mass fractions including nitrogen and biomass (N₂ basis)
     y_n2 = states('N2').Y[:, 0]
-    y_gas = states(*rct.sp_gases).Y.sum(axis=1)
+    y_gas = states(*rct.sp_gases_n2).Y.sum(axis=1)
     y_liquid = states(*rct.sp_liquids).Y.sum(axis=1)
     y_solid = states(*rct.sp_solids).Y.sum(axis=1)
     y_meta = states(*rct.sp_metaplastics).Y.sum(axis=1)
