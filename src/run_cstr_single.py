@@ -18,16 +18,11 @@ A predictive model of biochar formation and characterization. Journal of
 Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 """
 
-import cantera as ct
 import chemics as cm
 import json
 import matplotlib.pyplot as plt
-import numpy as np
+import reactor as rct
 from feedstock import Feedstock
-
-# Disable warnings about discontinuity at polynomial mid-point in thermo data.
-# Remove this line to show the warnings.
-ct.suppress_thermo_warnings()
 
 # Parameters
 # ----------------------------------------------------------------------------
@@ -35,13 +30,13 @@ ct.suppress_thermo_warnings()
 diam = 0.0525    # inner reactor diameter [m], 5.25 cm
 length = 0.4318  # total reactor length or height [m], 43.18 cm
 temp = 773.15    # reactor temperature [K]
-pabs = 101_325   # reactor absolute pressure [Pa]
-tau = 20         # residence time [s]
+p = 101_325      # reactor absolute pressure [Pa]
 
 ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
 n_cstrs = 1000                      # number of CSTRs in series
+tau = 20 / n_cstrs                  # residence time [s]
 energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 
@@ -61,7 +56,7 @@ bc, splits = feedstock.calc_biocomp()
 cell, hemi, ligc, ligh, ligo, tann, tgl = bc['y_daf']
 
 # Get feedstock moisture content as mass fraction
-yh2o = feedstock.prox_ad[3] / 100
+y0_h2o = feedstock.prox_ad[3] / 100
 
 # Reactor inputs
 # ----------------------------------------------------------------------------
@@ -73,87 +68,35 @@ mf_bio = ghr_bio / 1000 / 3600
 # 1 m³/s = 60,000 liter/minute
 # N₂ gas molecular weight = 28 g/mol
 # N₂ gas density at STP = 1.2506 kg/m³
-lpm_n2 = cm.slm_to_lpm(slm_n2, pabs / 1000, temp)
+lpm_n2 = cm.slm_to_lpm(slm_n2, p / 1000, temp)
 rhog_n2 = cm.rhog(28, 101325, 773.15)
 mf_n2 = lpm_n2 / 60_000 * rhog_n2
 
 # Mass fraction of nitrogen gas into reactor
-y_n2 = mf_n2 / (mf_n2 + mf_bio)
+y0_n2 = mf_n2 / (mf_n2 + mf_bio)
 
 # All mass fractions for reactor input
-y0_all = {'N2': y_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
-          'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
+y0 = {'N2': y0_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
+      'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': y0_h2o}
 
 # Cantera CSTR model
 # ----------------------------------------------------------------------------
 
-# Setup gas phase
-gas = ct.Solution(cti)
-gas.TPY = temp, pabs, y0_all
+states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0)
 
-# Create a stirred tank reactor (CSTR)
-dz = length / n_cstrs
-area = np.pi * (diam**2)
-vol = area * dz
-cstr = ct.IdealGasConstPressureReactor(gas, energy=energy, volume=vol)
-
-# Reservoirs for the inlet and outlet of each CSTR
-inlet = ct.Reservoir(gas)
-outlet = ct.Reservoir(gas)
-
-# Mass flow rate into the CSTR
-mf = ct.MassFlowController(upstream=inlet, downstream=cstr, mdot=cstr.mass / tau)
-
-# Determine pressure in the CSTR
-ct.PressureController(upstream=cstr, downstream=outlet, master=mf, K=1e-5)
-
-# Create a reactor network for performing the simulation
-sim = ct.ReactorNet([cstr])
-
-# Store the results for each CSTR
-states = ct.SolutionArray(cstr.thermo)
-states.append(cstr.thermo.state)
-
-for n in range(n_cstrs):
-    gas.TPY = cstr.thermo.TPY
-    inlet.syncState()
-    sim.reinitialize()
-    sim.advance_to_steady_state()
-    states.append(cstr.thermo.state)
-
-# Species representing each phase
-gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2', 'N2')
-
-liquids = (
-    'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
-    'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H',
-    'CH3OH', 'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12',
-    'VANILLIN'
-)
-
-solids = (
-    'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
-    'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR', 'ACQUA'
-)
-
-metaplastics = (
-    'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
-    'GH2', 'GC2H6'
-)
-
-# Mass fractions including nitrogen and biomass (N₂ basis)
+# Mass fractions of phases and nitrogen gas in each CSTR (N₂ basis)
 y_n2 = states('N2').Y[:, 0]
-y_gas = states(*gases).Y.sum(axis=1)
-y_liquid = states(*liquids).Y.sum(axis=1)
-y_solid = states(*solids).Y.sum(axis=1)
-y_meta = states(*metaplastics).Y.sum(axis=1)
+y_gas_n2 = states(*rct.sp_gases).Y.sum(axis=1)
+y_liquid_n2 = states(*rct.sp_liquids).Y.sum(axis=1)
+y_solid_n2 = states(*rct.sp_solids).Y.sum(axis=1)
+y_metaplastic_n2 = states(*rct.sp_metaplastics).Y.sum(axis=1)
 
-# Mass fractions from only biomass (no nitrogen gas, N₂ free basis)
-sum_bio = y_gas + y_liquid + y_solid + y_meta - y_n2
-y_gas_bio = (y_gas - y_n2) / sum_bio
-y_liquid_bio = y_liquid / sum_bio
-y_solid_bio = y_solid / sum_bio
-y_meta_bio = y_meta / sum_bio
+# Mass fractions of the phases excluding nitrogen gas in each CSTR (N₂ free basis)
+sum_no_n2 = y_gas_n2 + y_liquid_n2 + y_solid_n2 + y_metaplastic_n2 - y_n2
+y_gas = (y_gas_n2 - y_n2) / sum_no_n2
+y_liquid = y_liquid_n2 / sum_no_n2
+y_solid = y_solid_n2 / sum_no_n2
+y_metaplastic = y_metaplastic_n2 / sum_no_n2
 
 # Print
 # ----------------------------------------------------------------------------
@@ -166,7 +109,7 @@ print(
     f'diam       {diam} m\n'
     f'length     {length} m\n'
     f'temp       {temp} K\n'
-    f'pabs       {pabs:,} Pa\n'
+    f'p          {p:,} Pa\n'
     f'tau        {tau} s\n'
     f'n_cstrs    {n_cstrs}\n'
     f'energy     {energy}\n'
@@ -179,28 +122,28 @@ print(
     f'mf_n2    {mf_n2:.4g} kg/s\n'
 )
 
-y_total = y_gas[-1] + y_liquid[-1] + y_solid[-1] + y_meta[-1]
-y_total_bio = y_gas_bio[-1] + y_liquid_bio[-1] + y_solid_bio[-1] + y_meta_bio[-1]
+y_total_n2 = y_gas_n2[-1] + y_liquid_n2[-1] + y_solid_n2[-1] + y_metaplastic_n2[-1]
+y_total = y_gas[-1] + y_liquid[-1] + y_solid[-1] + y_metaplastic[-1]
 
 print(
     'Exit mass fractions\n'
-    f'                N₂ basis   N₂ free\n'
-    f'gases         {y_gas[-1]:>8.4f} {y_gas_bio[-1]:>10.4f}\n'
-    f'liquids       {y_liquid[-1]:>8.4f} {y_liquid_bio[-1]:>10.4f}\n'
-    f'solids        {y_solid[-1]:>8.4f} {y_solid_bio[-1]:>10.4f}\n'
-    f'metaplastics  {y_meta[-1]:>8.4f} {y_meta_bio[-1]:>10.4f}\n'
-    f'total         {y_total:>8.2f} {y_total_bio:>10.2f}\n'
+    f'              N₂ basis    N₂ free\n'
+    f'gas          {y_gas_n2[-1]:>8.4f} {y_gas[-1]:>10.4f}\n'
+    f'liquid       {y_liquid_n2[-1]:>8.4f} {y_liquid[-1]:>10.4f}\n'
+    f'solid        {y_solid_n2[-1]:>8.4f} {y_solid[-1]:>10.4f}\n'
+    f'metaplastic  {y_metaplastic_n2[-1]:>8.4f} {y_metaplastic[-1]:>10.4f}\n'
+    f'total        {y_total_n2:>8.2f} {y_total:>10.2f}\n'
 )
 
 print(
-    'Exit yields wt. %\n'
+    'Exit yields as wt. %\n'
     f'                N₂ basis   N₂ free\n'
-    f'gases         {y_gas[-1] * 100:>8.2f} {y_gas_bio[-1] * 100:>10.2f}\n'
-    f'liquids       {y_liquid[-1] * 100:>8.2f} {y_liquid_bio[-1] * 100:>10.2f}\n'
-    f'solids        {y_solid[-1] * 100:>8.2f} {y_solid_bio[-1] * 100:>10.2f}\n'
-    f'metaplastics  {y_meta[-1] * 100:>8.2f} {y_meta_bio[-1] * 100:>10.2f}\n'
-    f'total         {y_total * 100:>8.2f} {y_total_bio * 100:>10.2f}\n\n'
-    f'total solids  {(y_solid[-1] + y_meta[-1]) * 100:>8.2f} {(y_solid_bio[-1] + y_meta_bio[-1]) * 100:>10.2f}'
+    f'gas           {y_gas_n2[-1] * 100:>8.2f} {y_gas[-1] * 100:>10.2f}\n'
+    f'liquid        {y_liquid_n2[-1] * 100:>8.2f} {y_liquid[-1] * 100:>10.2f}\n'
+    f'solid         {y_solid_n2[-1] * 100:>8.2f} {y_solid[-1] * 100:>10.2f}\n'
+    f'metaplastic   {y_metaplastic_n2[-1] * 100:>8.2f} {y_metaplastic[-1] * 100:>10.2f}\n'
+    f'total         {y_total_n2 * 100:>8.2f} {y_total * 100:>10.2f}\n\n'
+    f'total solids  {(y_solid_n2[-1] + y_metaplastic_n2[-1]) * 100:>8.2f} {(y_solid[-1] + y_metaplastic[-1]) * 100:>10.2f}'
 )
 
 
@@ -226,10 +169,10 @@ def _config(ax, xlabel, ylabel, title=None, legend=None):
 # Yields for N₂ basis
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(10, 4.8), tight_layout=True)
 
-ax1.plot(y_gas, label='gas')
-ax1.plot(y_liquid, label='liquid')
-ax1.plot(y_solid, label='solid')
-ax1.plot(y_meta, label='meta')
+ax1.plot(y_gas_n2, label='gas')
+ax1.plot(y_liquid_n2, label='liquid')
+ax1.plot(y_solid_n2, label='solid')
+ax1.plot(y_metaplastic_n2, label='metaplastic')
 _config(ax1, xlabel='CSTR [-]', ylabel='Mass fraction [-]', legend='best')
 
 ax2.plot(states.T)
@@ -241,10 +184,10 @@ _config(ax3, xlabel='CSTR [-]', ylabel='Pressure [kPa]')
 # Yields for N₂ free basis
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(10, 4.8), tight_layout=True)
 
-ax1.plot(y_gas_bio, label='gas')
-ax1.plot(y_liquid_bio, label='liquid')
-ax1.plot(y_solid_bio, label='solid')
-ax1.plot(y_meta_bio, label='meta')
+ax1.plot(y_gas, label='gas')
+ax1.plot(y_liquid, label='liquid')
+ax1.plot(y_solid, label='solid')
+ax1.plot(y_metaplastic, label='metaplastic')
 _config(ax1, xlabel='CSTR [-]', ylabel='Mass fraction [-]', legend='best')
 
 ax2.plot(states.T)

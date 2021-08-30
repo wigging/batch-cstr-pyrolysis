@@ -23,6 +23,7 @@ import chemics as cm
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import reactor as rct
 from feedstock import Feedstock
 
 # Disable warnings about discontinuity at polynomial mid-point in thermo data.
@@ -35,13 +36,13 @@ ct.suppress_thermo_warnings()
 diam = 0.0525    # inner reactor diameter [m], 5.25 cm
 length = 0.4318  # total reactor length or height [m], 43.18 cm
 temp = 773.15    # reactor temperature [K]
-pabs = 101_325   # reactor absolute pressure [Pa]
-tau = 20         # residence time [s]
+p = 101_325      # reactor absolute pressure [Pa]
 
 ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
 n_cstrs = 1000                      # number of CSTRs in series
+tau = 20 / n_cstrs                  # residence time [s]
 energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 
@@ -63,7 +64,7 @@ mf_bio = ghr_bio / 1000 / 3600
 # 1 m³/s = 60,000 liter/minute
 # N₂ gas molecular weight = 28 g/mol
 # N₂ gas density at STP = 1.2506 kg/m³
-lpm_n2 = cm.slm_to_lpm(slm_n2, pabs / 1000, temp)
+lpm_n2 = cm.slm_to_lpm(slm_n2, p / 1000, temp)
 rhog_n2 = cm.rhog(28, 101325, 773.15)
 mf_n2 = lpm_n2 / 60_000 * rhog_n2
 
@@ -97,69 +98,18 @@ for i, feedstock in enumerate(feedstocks):
     yh2o = feedstock.prox_ad[3] / 100
 
     # All mass fractions for reactor input
-    y0_all = {'N2': y0_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
-              'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
+    y0 = {'N2': y0_n2, 'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh,
+          'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-    # Setup gas phase
-    gas = ct.Solution(cti)
-    gas.TPY = temp, pabs, y0_all
-
-    # Create a stirred tank reactor (CSTR)
-    dz = length / n_cstrs
-    area = np.pi * (diam**2)
-    vol = area * dz
-    cstr = ct.IdealGasConstPressureReactor(gas, energy=energy, volume=vol)
-
-    # Reservoirs for the inlet and outlet of each CSTR
-    inlet = ct.Reservoir(gas)
-    outlet = ct.Reservoir(gas)
-
-    # Mass flow rate into the CSTR
-    mf = ct.MassFlowController(upstream=inlet, downstream=cstr, mdot=cstr.mass / tau)
-
-    # Determine pressure in the CSTR
-    ct.PressureController(upstream=cstr, downstream=outlet, master=mf, K=1e-5)
-
-    # Create a reactor network for performing the simulation
-    sim = ct.ReactorNet([cstr])
-
-    # Store the results for each CSTR
-    states = ct.SolutionArray(cstr.thermo)
-    states.append(cstr.thermo.state)
-
-    for n in range(n_cstrs):
-        gas.TPY = cstr.thermo.TPY
-        inlet.syncState()
-        sim.reinitialize()
-        sim.advance_to_steady_state()
-        states.append(cstr.thermo.state)
-
-    # Species representing each phase
-    gases = ('C2H4', 'C2H6', 'CH2O', 'CH4', 'CO', 'CO2', 'H2', 'N2')
-
-    liquids = (
-        'C2H3CHO', 'C2H5CHO', 'C2H5OH', 'C5H8O4', 'C6H10O5', 'C6H5OCH3', 'C6H5OH',
-        'C6H6O3', 'C24H28O4', 'CH2OHCH2CHO', 'CH2OHCHO', 'CH3CHO', 'CH3CO2H',
-        'CH3OH', 'CHOCHO', 'CRESOL', 'FURFURAL', 'H2O', 'HCOOH', 'MLINO', 'U2ME12',
-        'VANILLIN'
-    )
-
-    solids = (
-        'CELL', 'CELLA', 'GMSW', 'HCE1', 'HCE2', 'ITANN', 'LIG', 'LIGC', 'LIGCC',
-        'LIGH', 'LIGO', 'LIGOH', 'TANN', 'TGL', 'CHAR', 'ACQUA'
-    )
-
-    metaplastics = (
-        'GCH2O', 'GCO2', 'GCO', 'GCH3OH', 'GCH4', 'GC2H4', 'GC6H5OH', 'GCOH2',
-        'GH2', 'GC2H6'
-    )
+    # Run CSTR simulation
+    states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0)
 
     # Mass fractions including nitrogen and biomass (N₂ basis)
     y_n2 = states('N2').Y[:, 0]
-    y_gas = states(*gases).Y.sum(axis=1)
-    y_liquid = states(*liquids).Y.sum(axis=1)
-    y_solid = states(*solids).Y.sum(axis=1)
-    y_meta = states(*metaplastics).Y.sum(axis=1)
+    y_gas = states(*rct.sp_gases).Y.sum(axis=1)
+    y_liquid = states(*rct.sp_liquids).Y.sum(axis=1)
+    y_solid = states(*rct.sp_solids).Y.sum(axis=1)
+    y_meta = states(*rct.sp_metaplastics).Y.sum(axis=1)
 
     # Mass fractions from only biomass (no nitrogen gas, N₂ free basis)
     sum_bio = y_gas + y_liquid + y_solid + y_meta - y_n2
@@ -176,9 +126,9 @@ for i, feedstock in enumerate(feedstocks):
     yf_metas[i] = y_meta_bio[-1]
 
     # Experiment lumped yields
-    exp_gases[i] = feedstock.lump_yield[0]
-    exp_liquids[i] = feedstock.lump_yield[1]
-    exp_solids[i] = feedstock.lump_yield[2]
+    exp_gases[i] = feedstock.lump2_yield[0]
+    exp_liquids[i] = feedstock.lump2_yield[1]
+    exp_solids[i] = feedstock.lump2_yield[2]
     exp_ash[i] = feedstock.prox_ad[2]
 
 # Print
@@ -191,7 +141,7 @@ print(
     f'diam       {diam} m\n'
     f'length     {length} m\n'
     f'temp       {temp} K\n'
-    f'pabs       {pabs:,} Pa\n'
+    f'p          {p:,} Pa\n'
     f'tau        {tau} s\n'
     f'n_cstrs    {n_cstrs}\n'
     f'energy     {energy}\n'
