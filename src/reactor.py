@@ -32,6 +32,25 @@ sp_metaplastics = (
     'GH2', 'GC2H6')
 
 
+def run_batch_simulation(cti, pressure, temp, time, y0, energy='off'):
+    """
+    Run the batch reactor simulation.
+    """
+
+    gas = ct.Solution(cti)
+    gas.TPY = temp, pressure, y0
+
+    r = ct.IdealGasReactor(gas, energy=energy)
+    sim = ct.ReactorNet([r])
+    states = ct.SolutionArray(gas, extra=['t'])
+
+    for t in time:
+        sim.advance(t)
+        states.append(r.thermo.state, t=t)
+
+    return states
+
+
 def run_cstr_simulation(cti, diam, length, n_cstrs, pressure, tau, temp, y0, energy='off'):
     """
     Run the CSTR simulation.
@@ -72,3 +91,46 @@ def run_cstr_simulation(cti, diam, length, n_cstrs, pressure, tau, temp, y0, ene
         states.append(cstr.thermo.state)
 
     return states
+
+
+def get_ycho_gases(states):
+    """
+    Carbon, hydrogen, and oxygen fractions at each time step for each gas
+    species. Fraction values obtained from output of `ycho_fractions.py`.
+    """
+    c_fracs = [0.86, 0.80, 0.40, 0.75, 0.43, 0.27, 0]
+    h_fracs = [0.14, 0.20, 0.07, 0.25, 0, 0, 1]
+    o_fracs = [0, 0, 0.53, 0, 0.57, 0.73, 0]
+
+    yc = states(*sp_gases).Y * c_fracs
+    yh = states(*sp_gases).Y * h_fracs
+    yo = states(*sp_gases).Y * o_fracs
+
+    return yc, yh, yo
+
+
+def get_ycho_liquids(states):
+    """
+    Carbon, hydrogen, and oxygen fractions at each time step for each liquid
+    species. Fraction values obtained from output of `ycho_fractions.py`.
+    """
+    c_fracs = [
+        0.64, 0.62, 0.52, 0.45, 0.44, 0.78, 0.77, 0.57, 0.76, 0.49, 0.40,
+        0.55, 0.40, 0.37, 0.41, 0.78, 0.63, 0.00, 0.26, 0.77, 0.74, 0.63
+    ]
+
+    h_fracs = [
+        0.07, 0.10, 0.13, 0.06, 0.06, 0.07, 0.06, 0.05, 0.07, 0.08, 0.07,
+        0.09, 0.07, 0.13, 0.03, 0.07, 0.04, 0.11, 0.04, 0.12, 0.11, 0.05
+    ]
+
+    o_fracs = [
+        0.29, 0.28, 0.35, 0.48, 0.49, 0.15, 0.17, 0.38, 0.17, 0.43, 0.53,
+        0.36, 0.53, 0.50, 0.55, 0.15, 0.33, 0.89, 0.70, 0.11, 0.15, 0.32
+    ]
+
+    yc = states(*sp_liquids).Y * c_fracs
+    yh = states(*sp_liquids).Y * h_fracs
+    yo = states(*sp_liquids).Y * o_fracs
+
+    return yc, yh, yo

@@ -20,7 +20,7 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from batch_reactor import BatchReactor
+import reactor as rct
 from feedstock import Feedstock
 
 # Parameters
@@ -57,18 +57,23 @@ yh2o = feedstock.prox_ad[3] / 100
 y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
       'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-batch = BatchReactor(y0, temp, p, time, cti)
-batch.run_simulation()
+states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
 
-# Mass fractions of the mixtures at each time step
-y_gasmix = batch.get_y_gasmix()
-y_liqmix = batch.get_y_liqmix()
-y_sldmix = batch.get_y_sldmix()
-y_metamix = batch.get_y_metamix()
+# Chemical species representing each phase
+sp_gases = rct.sp_gases
+sp_liquids = rct.sp_liquids
+sp_solids = rct.sp_solids
+sp_metaplastics = rct.sp_metaplastics
+
+# Mass fractions of the phases at each time step
+y_gas = states(*sp_gases).Y.sum(axis=1)
+y_liquid = states(*sp_liquids).Y.sum(axis=1)
+y_solid = states(*sp_solids).Y.sum(axis=1)
+y_metaplastic = states(*sp_metaplastics).Y.sum(axis=1)
 
 # Carbon, hydrogen, and oxygen fractions
-yc_gases, yh_gases, yo_gases = batch.get_ycho_gases()
-yc_liquids, yh_liquids, yo_liquids = batch.get_ycho_liquids()
+yc_gases, yh_gases, yo_gases = rct.get_ycho_gases(states)
+yc_liquids, yh_liquids, yo_liquids = rct.get_ycho_liquids(states)
 
 # Print
 # ----------------------------------------------------------------------------
@@ -108,11 +113,11 @@ print(
 
 print(
     '\nFinal mixture yields, wt. %\n'
-    f'gas           {y_gasmix[-1] * 100:.2f}\n'
-    f'liquid        {y_liqmix[-1] * 100:.2f}\n'
-    f'solid         {y_sldmix[-1] * 100:.2f}\n'
-    f'metaplastic   {y_metamix[-1] * 100:.2f}\n'
-    f'total solids  {(y_sldmix[-1] + y_metamix[-1]) * 100:.2f}'
+    f'gas           {y_gas[-1] * 100:.2f}\n'
+    f'liquid        {y_liquid[-1] * 100:.2f}\n'
+    f'solid         {y_solid[-1] * 100:.2f}\n'
+    f'metaplastic   {y_metaplastic[-1] * 100:.2f}\n'
+    f'total solids  {(y_solid[-1] + y_metaplastic[-1]) * 100:.2f}'
 )
 
 print(
@@ -136,8 +141,6 @@ def style(ax, xlabel, ylabel, loc=None):
     if loc:
         ax.legend(loc=loc)
 
-
-states = batch.states
 
 # ---
 
@@ -183,10 +186,10 @@ style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]', loc='best')
 # ---
 
 _, ax = plt.subplots(tight_layout=True)
-ax.plot(states.t, y_gasmix, label='gas')
-ax.plot(states.t, y_liqmix, label='liquid')
-ax.plot(states.t, y_sldmix, label='solid')
-ax.plot(states.t, y_metamix, label='metaplastic')
+ax.plot(states.t, y_gas, label='gas')
+ax.plot(states.t, y_liquid, label='liquid')
+ax.plot(states.t, y_solid, label='solid')
+ax.plot(states.t, y_metaplastic, label='metaplastic')
 style(ax, xlabel='Time [s]', ylabel='Mixture mass fraction [-]', loc='best')
 
 # ---
@@ -196,11 +199,6 @@ ax.plot(states.t, states.T, color='m')
 style(ax, xlabel='Time [s]', ylabel='Temperature [K]')
 
 # ---
-
-sp_gases = batch.sp_gases
-sp_liquids = batch.sp_liquids
-sp_solids = batch.sp_solids
-sp_metaplastics = batch.sp_metaplastics
 
 y_gas = np.arange(len(sp_gases))
 x_gas = states(*sp_gases).Y[-1]

@@ -20,7 +20,7 @@ Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from batch_reactor import BatchReactor
+import reactor as rct
 from feedstock import Feedstock
 
 # Parameters
@@ -47,10 +47,10 @@ feedstocks = [Feedstock(fd) for fd in fdata]
 # Store results for each feedstock
 names = []
 n = len(feedstocks)
-yf_gasmix = np.zeros(n)
-yf_liqmix = np.zeros(n)
-yf_sldmix = np.zeros(n)
-yf_metamix = np.zeros(n)
+yf_gas = np.zeros(n)
+yf_liquid = np.zeros(n)
+yf_solid = np.zeros(n)
+yf_metaplastic = np.zeros(n)
 exp_gases = np.zeros(n)
 exp_liquids = np.zeros(n)
 exp_solids = np.zeros(n)
@@ -71,20 +71,25 @@ for i, feedstock in enumerate(feedstocks):
     y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
           'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-    batch = BatchReactor(y0, temp, p, time, cti)
-    batch.run_simulation()
+    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
 
-    # Mass fractions of the mixtures at each time step
-    y_gasmix = batch.get_y_gasmix()
-    y_liqmix = batch.get_y_liqmix()
-    y_sldmix = batch.get_y_sldmix()
-    y_metamix = batch.get_y_metamix()
+    # Chemical species representing each phase
+    sp_gases = rct.sp_gases
+    sp_liquids = rct.sp_liquids
+    sp_solids = rct.sp_solids
+    sp_metaplastics = rct.sp_metaplastics
+
+    # Mass fractions of the phases at each time step
+    y_gas = states(*sp_gases).Y.sum(axis=1)
+    y_liquid = states(*sp_liquids).Y.sum(axis=1)
+    y_solid = states(*sp_solids).Y.sum(axis=1)
+    y_metaplastic = states(*sp_metaplastics).Y.sum(axis=1)
 
     # Final mixture mass fractions
-    yf_gasmix[i] = y_gasmix[-1]
-    yf_liqmix[i] = y_liqmix[-1]
-    yf_sldmix[i] = y_sldmix[-1]
-    yf_metamix[i] = y_metamix[-1]
+    yf_gas[i] = y_gas[-1]
+    yf_liquid[i] = y_liquid[-1]
+    yf_solid[i] = y_solid[-1]
+    yf_metaplastic[i] = y_metaplastic[-1]
 
     # Experiment lumped yields
     # exp_gases[i] = feedstock.lump_yield[0]
@@ -121,12 +126,17 @@ def style_barh(ax):
 
 
 y = np.arange(n)
+yf_gas = yf_gas * 100
+yf_liquid = yf_liquid * 100
+yf_solid = yf_solid * 100
+yf_metaplastic = yf_metaplastic * 100
+yf_solidmeta = yf_solid + yf_metaplastic
 
 _, ax = plt.subplots(tight_layout=True, figsize=(9, 4.8))
-b1 = ax.barh(y, yf_gasmix * 100, color='C6', label='Gases')
-b2 = ax.barh(y, yf_liqmix * 100, left=yf_gasmix * 100, color='C4', label='Liquids')
-b3 = ax.barh(y, yf_sldmix * 100, left=(yf_gasmix + yf_liqmix) * 100, color='C2', label='Solids')
-b4 = ax.barh(y, yf_metamix * 100, left=(yf_gasmix + yf_liqmix + yf_sldmix) * 100, color='C1', label='Metaplastics')
+b1 = ax.barh(y, yf_gas, color='C6', label='Gases')
+b2 = ax.barh(y, yf_liquid, left=yf_gas, color='C4', label='Liquids')
+b3 = ax.barh(y, yf_solid, left=yf_gas + yf_liquid, color='C2', label='Solids')
+b4 = ax.barh(y, yf_metaplastic, left=yf_gas + yf_liquid + yf_solid, color='C1', label='Metaplastics')
 ax.bar_label(b1, label_type='center', fmt='%.1f')
 ax.bar_label(b2, label_type='center', fmt='%.1f')
 ax.bar_label(b3, label_type='center', fmt='%.1f')
@@ -140,17 +150,12 @@ style_barh(ax)
 # ---
 
 h = 0.4
-yf_gasmix = yf_gasmix * 100
-yf_liqmix = yf_liqmix * 100
-yf_sldmix = yf_sldmix * 100
-yf_metamix = yf_metamix * 100
-yf_solidmeta = yf_sldmix + yf_metamix
 
 _, ax = plt.subplots(tight_layout=True, figsize=(9, 8))
 
-b1 = ax.barh(y, yf_gasmix, edgecolor='k', height=h, color='C6', label='Gases')
-b2 = ax.barh(y, yf_liqmix, edgecolor='k', left=yf_gasmix, height=h, color='C4', label='Liquids')
-b3 = ax.barh(y, yf_solidmeta, edgecolor='k', left=yf_gasmix + yf_liqmix, height=h, color='C2', label='Solids')
+b1 = ax.barh(y, yf_gas, edgecolor='k', height=h, color='C6', label='Gases')
+b2 = ax.barh(y, yf_liquid, edgecolor='k', left=yf_gas, height=h, color='C4', label='Liquids')
+b3 = ax.barh(y, yf_solidmeta, edgecolor='k', left=yf_gas + yf_liquid, height=h, color='C2', label='Solids')
 
 e1 = ax.barh(y + h, exp_gases, edgecolor='k', height=h, color='C6')
 e2 = ax.barh(y + h, exp_liquids, edgecolor='k', height=h, left=exp_gases, color='C4')
@@ -177,25 +182,25 @@ def style(ax):
     ax.tick_params(color='0.9')
 
 
-pfit_gas_model = np.poly1d(np.polyfit(exp_ash, yf_gasmix, 1))
+pfit_gas_model = np.poly1d(np.polyfit(exp_ash, yf_gas, 1))
 pfit_gas_exp = np.poly1d(np.polyfit(exp_ash, exp_gases, 1))
 
-pfit_liq_model = np.poly1d(np.polyfit(exp_ash, yf_liqmix, 1))
+pfit_liq_model = np.poly1d(np.polyfit(exp_ash, yf_liquid, 1))
 pfit_liq_exp = np.poly1d(np.polyfit(exp_ash, exp_liquids, 1))
 
-pfit_sld_model = np.poly1d(np.polyfit(exp_ash, yf_sldmix, 1))
+pfit_sld_model = np.poly1d(np.polyfit(exp_ash, yf_solid, 1))
 pfit_sld_exp = np.poly1d(np.polyfit(exp_ash, exp_solids, 1))
 
 _, (ax1, ax2, ax3) = plt.subplots(nrows=3, ncols=1, figsize=(4.8, 8), sharex=True, tight_layout=True)
 
-ax1.plot(exp_ash, yf_gasmix, 'ro', label='model')
+ax1.plot(exp_ash, yf_gas, 'ro', label='model')
 ax1.plot(exp_ash, pfit_gas_model(exp_ash), 'r')
 ax1.plot(exp_ash, exp_gases, 'ko', label='exp')
 ax1.plot(exp_ash, pfit_gas_exp(exp_ash), 'k')
 ax1.set_ylabel('Gases [wt. %]')
 style(ax1)
 
-ax2.plot(exp_ash, yf_liqmix, 'ro', label='model')
+ax2.plot(exp_ash, yf_liquid, 'ro', label='model')
 ax2.plot(exp_ash, pfit_liq_model(exp_ash), 'r')
 ax2.plot(exp_ash, exp_liquids, 'ko', label='exp')
 ax2.plot(exp_ash, pfit_liq_exp(exp_ash), 'k')
@@ -203,7 +208,7 @@ ax2.set_ylabel('Liquids [wt. %]')
 ax2.legend(loc='best')
 style(ax2)
 
-ax3.plot(exp_ash, yf_sldmix, 'ro', label='model')
+ax3.plot(exp_ash, yf_solid, 'ro', label='model')
 ax3.plot(exp_ash, pfit_sld_model(exp_ash), 'r')
 ax3.plot(exp_ash, exp_solids, 'ko', label='exp')
 ax3.plot(exp_ash, pfit_sld_exp(exp_ash), 'k')
