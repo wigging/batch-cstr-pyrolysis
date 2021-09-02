@@ -1,0 +1,75 @@
+"""
+Papadikis 2010 kinetic scheme for biomass pyrolysis that includes primary and
+secondary reactions.
+
+Reference
+---------
+K. Papadikis, S. Gu, and A.V. Bridgwater. Computational modelling of the
+impact of particle size to the heat transfer coefficient between biomass
+particles and a fluidised bed. Fuel Processing Technology, vol. 91, no. 1,
+pp. 68-79, 2010.
+"""
+
+# flake8: noqa
+
+#-------------------------------------------------------------------------------
+# Phases data
+#-------------------------------------------------------------------------------
+
+units(
+    length = "m",
+    mass = "kg",
+    quantity = "mol",
+    time = "s",
+    energy = "J",
+    act_energy = "kJ/mol",
+    pressure = "Pa"
+)
+
+ideal_gas(
+    elements = "C",
+    species = "wood gas tar char",
+    reactions = "all"
+)
+
+#-------------------------------------------------------------------------------
+# Species data
+#-------------------------------------------------------------------------------
+
+species(
+    name = "wood",
+    atoms = "C:1"
+)
+
+species(
+    name = "gas",
+    atoms = "C:1"
+)
+
+species(
+    name = "tar",
+    atoms = "C:1"
+)
+
+species(
+    name = "char",
+    atoms = "C:1"
+)
+
+#-------------------------------------------------------------------------------
+# Reaction data
+#-------------------------------------------------------------------------------
+
+# Primary reactions
+
+reaction("wood => gas", [1.3e8, 0, 140])
+
+reaction("wood => tar", [2e8, 0, 133])
+
+reaction("wood => char", [1.08e7, 0, 121])
+
+# Secondary reactions
+
+reaction("tar => gas", [4.28e6, 0, 108])
+
+reaction("tar => char", [1e6, 0, 108])
