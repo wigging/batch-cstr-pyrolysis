@@ -83,29 +83,37 @@ for i in range(ntemps):
 # ----------------------------------------------------------------------------
 
 
-def style(ax, xlabel, ylabel, loc=None):
+def style(ax, xlabel, ylabel, loc):
     ax.grid(color='0.9')
     ax.set_frame_on(False)
     ax.tick_params(color='0.9')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    if loc:
-        ax.legend(loc=loc)
+    ax.legend(loc=loc)
 
 
 _, ax = plt.subplots(tight_layout=True)
 for i in range(ntemps):
-    ax.plot(time, yt_gas[i], label=f'{temps[i]} K')
+    if temps[i] == 773.15:
+        ax.plot(time, yt_gas[i], 'k--', label=f'{temps[i]} K')
+    else:
+        ax.plot(time, yt_gas[i], label=f'{temps[i]} K')
 style(ax, 'Time [s]', 'Gas mass fraction [-]', loc='best')
 
 _, ax = plt.subplots(tight_layout=True)
 for i in range(ntemps):
-    ax.plot(time, yt_liquid[i], label=f'{temps[i]} K')
+    if temps[i] == 773.15:
+        ax.plot(time, yt_liquid[i], 'k--', label=f'{temps[i]} K')
+    else:
+        ax.plot(time, yt_liquid[i], label=f'{temps[i]} K')
 style(ax, 'Time [s]', 'Liquid mass fraction [-]', loc='best')
 
 _, ax = plt.subplots(tight_layout=True)
 for i in range(ntemps):
-    ax.plot(time, yt_solid[i], label=f'{temps[i]} K')
+    if temps[i] == 773.15:
+        ax.plot(time, yt_solid[i], 'k--', label=f'{temps[i]} K')
+    else:
+        ax.plot(time, yt_solid[i], label=f'{temps[i]} K')
 style(ax, 'Time [s]', 'Solid mass fraction [-]', loc='best')
 
 plt.show()
