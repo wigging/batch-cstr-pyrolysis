@@ -12,9 +12,18 @@ from feedstock import Feedstock
 # Parameters
 # ----------------------------------------------------------------------------
 
-# Chemical species used to predict final yield
-# C6H5OH is phenol
-chemical = 'FURFURAL'
+# Select a chemical species used to predict final yield
+# Make sure `y_chemical[i]` is modified appropriately, see below
+# Make sure `ax.set_xlabel()` is modified appropriately, see below
+
+# phenol is C6H5OH
+chemical = 'C6H5OH'
+
+# furfural is FURFURAL
+# chemical = 'FURFURAL'
+
+# acetic acid is CH2OHCHO and CH3CO2H
+# chemical = ('CH2OHCHO', 'CH3CO2H')
 
 temp = 773.15                       # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
@@ -58,6 +67,7 @@ for i in range(n):
     states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
 
     y_chemical[i] = states(chemical).Y[-1]
+    # y_chemical[i] = states(*chemical).Y.sum(axis=1)[-1]
 
 # Plot
 # ----------------------------------------------------------------------------
@@ -66,7 +76,7 @@ y = np.arange(n)
 
 _, ax = plt.subplots(tight_layout=True)
 ax.barh(y, y_chemical)
-ax.set_xlabel('Furfural mass fraction [-]')
+ax.set_xlabel('Phenol, mass fraction [-]')
 ax.set_yticks(y)
 ax.set_yticklabels(names)
 ax.invert_yaxis()
