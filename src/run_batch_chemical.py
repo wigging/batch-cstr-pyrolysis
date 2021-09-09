@@ -1,6 +1,9 @@
 """
 Run a batch reactor model to compare final yield of a chemical species for
-each feedstock using the Debiagi 2018 kinetics.
+each feedstock using the Debiagi 2018 kinetics. According to Kristiina Iisa,
+formaldehyde, propionaldehyde, heavy molecular weight lignin, and
+acetaldehyde are detrimental to upgrading by catalytic pyrolysis. She also
+suggests that in general acids are bad such as acetic acid.
 """
 
 import json
@@ -12,25 +15,37 @@ from feedstock import Feedstock
 # Parameters
 # ----------------------------------------------------------------------------
 
-# Select a chemical species used to predict final yield
-# Make sure `y_chemical[i]` is modified appropriately, see below
-# Make sure `ax.set_xlabel()` is modified appropriately, see below
-
-# phenol is C6H5OH
-chemical = 'C6H5OH'
-
-# furfural is FURFURAL
-# chemical = 'FURFURAL'
-
-# acetic acid is CH2OHCHO and CH3CO2H
-# chemical = ('CH2OHCHO', 'CH3CO2H')
-
 temp = 773.15                       # reactor temperature [K]
 p = 101325.0                        # reactor pressure [Pa]
 time = np.linspace(0, 20.0, 100)    # reaction time steps [s]
 
 energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
+
+# Select a chemical species used to predict final yield
+# make sure `y_chemical[i]` is modified appropriately, see below
+# make sure `ax.set_xlabel()` is modified appropriately, see below
+
+# phenol is C6H5OH
+# chemical = 'C6H5OH'
+
+# furfural is FURFURAL
+# chemical = 'FURFURAL'
+
+# formaldehyde is CH2O
+# chemical = 'CH2O'
+
+# propionaldehyde is C2H5CHO
+# chemical = 'C2H5CHO'
+
+# heavy molecular weight lignin is C24H28O4
+# chemical = 'C24H28O4'
+
+# acetaldehyde is CH3CHO
+chemical = 'CH3CHO'
+
+# acetic acid is CH2OHCHO and CH3CO2H
+# chemical = ('CH2OHCHO', 'CH3CO2H')
 
 # Feedstocks
 # ----------------------------------------------------------------------------
@@ -76,7 +91,7 @@ y = np.arange(n)
 
 _, ax = plt.subplots(tight_layout=True)
 ax.barh(y, y_chemical)
-ax.set_xlabel('Phenol, mass fraction [-]')
+ax.set_xlabel('Acetaldehyde, mass fraction [-]')
 ax.set_yticks(y)
 ax.set_yticklabels(names)
 ax.invert_yaxis()
