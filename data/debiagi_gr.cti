@@ -1,14 +1,20 @@
-# flake8: noqa
+"""
+Biomass pyrolysis reactions for grass based on the Debiagi 2018 kinetic
+scheme.
 
-# Biomass pyrolysis kinetic reactions for grass based on Debiagi 2018.
-#
-# P. Debiagi, G. Gentile, A. Cuoci, A. Frassoldati, E. Ranzi, and T.
-# Faravelli. A predictive model of biochar formation and characterization.
-# Journal of Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
-#
-# species G{COH2} stiff is represented by GCOH2
-# species G{COH2} loose is represented by GCH2O
-#
+Notes
+-----
+species G{COH2} stiff is represented by GCOH2
+species G{COH2} loose is represented by GCH2O
+
+Reference
+---------
+P. Debiagi, G. Gentile, A. Cuoci, A. Frassoldati, E. Ranzi, and T. Faravelli.
+A predictive model of biochar formation and characterization. Journal of
+Analytical and Applied Pyrolysis, vol. 134, pp. 326-335, 2018.
+"""
+
+# flake8: noqa
 
 # ----------------------------------------------------------------------------
 # Phases data
@@ -641,8 +647,14 @@ species(
 
 species(
     name="ACQUA",
-    atoms="H:2 O:1"
-)
+    atoms="H:2 O:1",
+    thermo=(
+        NASA([300, 1000], [
+            9.04470000E+00, 1.60000000E-03, -6.00000000E-06, 6.00000000E-09,
+            -2.00000000E-12, -3.70865499E+04, -2.88280137E+02]),
+        NASA([1000, 4000], [
+            9.04470000E+00, 1.60000000E-03, -6.00000000E-06, 6.00000000E-09,
+            -2.00000000E-12, -3.70865499E+04, -2.88280137E+02])))
 
 # ----------------------------------------------------------------------------
 # Reaction data
