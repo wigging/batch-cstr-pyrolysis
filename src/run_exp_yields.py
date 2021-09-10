@@ -64,6 +64,7 @@ def style(ax):
     ax.tick_params(color='0.9')
 
 
+# Trendlines
 z1 = np.polyfit(ash, oil, 1)
 p1 = np.poly1d(z1)
 
@@ -73,6 +74,7 @@ p2 = np.poly1d(z2)
 z3 = np.polyfit(ash, liquids, 1)
 p3 = np.poly1d(z3)
 
+# Yields vs ash content and show trendline
 _, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(9, 4.8), sharey=True, tight_layout=True)
 
 ax1.plot(ash, oil, 'o')
@@ -91,5 +93,17 @@ ax3.plot(ash, liquids, 'o')
 ax3.plot(ash, p3(ash))
 ax3.set_title('Liquids')
 style(ax3)
+
+# Yields for each feedstock
+labels = ['oil', 'condensables', 'light gas', 'water vapor', 'char']
+
+_, ax = plt.subplots(tight_layout=True)
+for f in feedstocks:
+    ax.plot(f.exp_yield, 'o')
+ax.set_ylabel('Weight % (wet basis)')
+ax.set_xlabel('Experiment yield')
+ax.set_xticks(range(len(labels)))
+ax.set_xticklabels(labels)
+style(ax)
 
 plt.show()

@@ -43,7 +43,7 @@
 
 \section{Introduction}
 
-This report discusses reactor modeling activities for the Feedstock-Conversion Interface Consortium (FCIC) project. Model parameters are based on the NREL 2FBR biomass fast pyrolysis system which is comprised of a two-inch diameter bubbling fluidized bed (BFB) reactor. Experiment data, apparatus information, and material data are provided by the National Renewable Energy Laboratory (NREL), the National Energy Technology Laboratory (NETL), and the Idaho National Laboratory (INL). Model development and associated results are provided by Oak Ridge National Laboratory (ORNL).
+This report discusses biomass pyrolysis fluidized bed reactor modeling activities for the Feedstock-Conversion Interface Consortium (FCIC) project. Model parameters are based on the NREL 2FBR biomass fast pyrolysis system which is comprised of a two-inch diameter bubbling fluidized bed (BFB) reactor. Experiment data, apparatus information, and material data are provided by the National Renewable Energy Laboratory (NREL), the National Energy Technology Laboratory (NETL), and the Idaho National Laboratory (INL). Model development and associated results are provided by Oak Ridge National Laboratory (ORNL).
 
 \section{Experimental apparatus}
 
@@ -95,7 +95,7 @@ Typical operating conditions of the pyrolyzer are presented in Table \ref{tab:op
 
 \begin{table}[H]
     \centering
-    \caption{Typical operating conditions for the fluidized bed pyrolysis reactor. Atmospheric pressure is for NREL site in Golden, CO.}
+    \caption{Typical operating conditions for the fluidized bed pyrolysis reactor. Atmospheric pressure considers elevation of NREL site in Golden, CO.}
     \label{tab:operating}
     \begin{tabular}{llrl}
         \toprule
@@ -109,9 +109,9 @@ Typical operating conditions of the pyrolyzer are presented in Table \ref{tab:op
         Pressure drop over distributor & $\Delta$ P          & 21.17     & KPa \\
         Absolute inlet gas pressure    & P$_{\textrm{gas1}}$ & 110--140  & kPa \\
         Inlet gas temperature          & T$_{\textrm{gas1}}$ & 773.15    & K \\
-        Inlet gas flowrate             & Q$_{\textrm{gas1}}$ & 14        & SLM (0.0292 g/s) \\
+        Inlet gas flowrate             & Q$_{\textrm{gas1}}$ & 14        & SLM (0.29 g/s) \\
         Secondary gas temperature      & T$_{\textrm{gas2}}$ & 298.15    & K \\
-        Secondary gas flowrate         & Q$_{\textrm{gas2}}$ & 1.4       & SLM (0.0292 g/s) \\
+        Secondary gas flowrate         & Q$_{\textrm{gas2}}$ & 1.4       & SLM (0.029 g/s) \\
         Absolute outlet gas pressure   & P$_{\textrm{gas3}}$ & 90--110   & kPa \\
         Biomass inlet feedrate         & $\dot{{\textrm{m}}}_{\textrm{feed}}$ & 420 & g/hr \\
         Biomass inlet temperature      & T$_{\textrm{feed}}$ & 298.15    & K \\
@@ -182,7 +182,7 @@ Proximate and ultimate analysis measurements for each feedstock are given in Tab
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/prox-ult-analysis.pdf}
-    \caption{Comparison of proximate (left) and ultimate (right) analysis measurements for each feedstock.}
+    \caption{Comparison of proximate (left) and ultimate (right) analysis measurements for each feedstock. Values represent wt. \% as-determined basis.}
     \label{fig:prox-ult-analysis}
 \end{figure}
 
@@ -652,18 +652,9 @@ Chemical analysis data for each feedstock was supplied by INL on a wt. \% dry ba
     \label{fig:chem-analysis}
 \end{figure}
 
-\subsection{Feedstock particle characteristics}
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
 \subsection{Bed particle characteristics}
 
-Characteristics of the sand particles that represent the fluidized bed material were obtained by NETL and are summarized in Table \ref{tab:sand}. A microscope image of the sand particles is shown in Figure \ref{fig:sand}. The particle density was determined from a helium pycnometer while size distribution and sphericity was obtained from QICPIC image analysis \cite{Netl-2021}.
+Characteristics of the sand particles that represent the fluidized bed material were obtained by NETL and are summarized in Table \ref{tab:sand}. A microscope image of the sand particles is shown in Figure \ref{fig:sand}. The particle density was determined from a helium pycnometer while size distribution and sphericity was obtained from QICPIC image analysis \cite{Netl-2021}. At the time of writing this report, bed particle characteristics were not utilized in the reactor models discussed in subsequent sections.
 
 \begin{table}[H]
     \caption{Bed material (sand) characteristics.}
@@ -690,38 +681,37 @@ Characteristics of the sand particles that represent the fluidized bed material 
 
 \subsection{Product yields}
 
-Product yields measured from the fast pyrolysis of each feedstock in the fluidized bed reactor are given in Table \ref{tab:yields}.
+Product yields measured from the fast pyrolysis of each feedstock in the fluidized bed reactor are given in Table \ref{tab:yields}. A comparison of the product yields from each feedstock is shown in Figure \ref{fig:yields}. The oil and char yields are the most variable between the different feedstocks while condensables and water vapor differ by a few percent.
 
-\begin{longtable}{lrr}
-    \caption{Product yields from each feedstock. Values expressed as wet basis (w) and dry basis (d).}
-    \label{tab:yields} \\
+\begin{table}[H]
+    \caption{Measured reactor yields from each feedstock experiment. Values expressed as percent wet basis (w).}
+    \label{tab:yields}
+    \centering
+    \begin{tabular}{lcccccr}
+        Feedstock & \rotatebox{90}{Oil} & \rotatebox{90}{Condensables} & \rotatebox{90}{Light gas} & \rotatebox{90}{Water vapor} & \rotatebox{90}{Char} & \rotatebox{90}{Total} \\
+        \toprule
+        Residues                    & 63.5 & 1.6 & 14.7 & 0.4 & 15.2 & 95.4 \\
+        Stem wood                   & 72.3 & 2.8 & 14.1 & 1.2 & 10.9 & 101.3 \\
+        Bark                        & 58.3 & 1.3 & 11.4 & 0.8 & 31.9 & 103.7 \\
+        Needles                     & 55.4 & 2.7 & 14.5 & 0.6 & 25.6 & 98.8 \\
+        Bark + needles              & 55.5 & 1.3 & 15.1 & 1.2 & 16.5 & 89.6 \\
+        Residues (rep 1)            & 62.6 & 2.5 & 15.9 & 2.5 & 17.3 & 100.8 \\
+        Residues:bark:needles 1:1:1 & 58.3 & 3.1 & 14.3 & 0.7 & 24.6 & 101.0 \\
+        Residues:bark:needles 1:2:2 & 57.1 & 0.6 & 15.0 & 2.0 & 25.0 & 99.7 \\
+        Air classified (10 Hz)      & 57.6 & 3.0 & 16.2 & 3.2 & 16.3 & 96.3 \\
+        Air classified (28 Hz)      & 65.0 & 2.5 & 17.9 & 1.6 & 13.9 & 100.9 \\
+        Whole tree (13 yr)          & 63.1 & 1.8 & 17.7 & 2.1 & 13.9 & 98.6 \\
+        Stem wood (13 yr)           & 67.8 & 1.9 & 15.2 & 3.2 & 12.2 & 100.3 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-    \textbf{Residues, Cycle 1} & w & d \\
-    \midrule
-    oil             & 63.5 & ? \\
-    condensables    & 1.6  & ? \\
-    light gas       & 14.7 & ? \\
-    water vapor     & 0.4  & ? \\
-    char            & 15.2 & ? \\
-    \\
-
-    \textbf{Stem wood, Cycle 2} & w & d \\
-    \midrule
-    oil             & 72.3 & ? \\
-    condensables    & 2.8  & ? \\
-    light gas       & 14.1 & ? \\
-    water vapor     & 1.2  & ? \\
-    char            & 10.9 & ? \\
-    \\
-
-    \textbf{Bark, Cycle 3} & w & d \\
-    \midrule
-    oil             & 58.3 & ? \\
-    condensables    & 1.3  & ? \\
-    light gas       & 11.4 & ? \\
-    water vapor     & 0.8  & ? \\
-    char            & 31.9 & ? \\
-\end{longtable}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/yields.pdf}
+    \caption{Comparison of the measured product yields for each feedstock. Values shown as percent wet basis.}
+    \label{fig:yields}
+\end{figure}
 
 \section{Biomass pyrolysis kinetics}
 
@@ -1109,6 +1099,14 @@ Reaction rates in the batch reactor model are determined from a forward rate con
 \end{equation}
 
 \noindent where $A$ is the pre-exponential factor, $T$ is the reaction temperature, $b$ is the temperature exponent, $E$ is the activation energy, and $R$ is the universal gas constant.
+
+\section{CSTR series model}
+
+Here.
+
+\section{Conclusions}
+
+Here.
 
 % --- References -------------------------------------------------------------
 
