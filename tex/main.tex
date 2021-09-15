@@ -45,7 +45,11 @@
 
 This report discusses biomass pyrolysis fluidized bed reactor modeling activities for the Feedstock-Conversion Interface Consortium (FCIC) project. Model parameters are based on the NREL 2FBR biomass fast pyrolysis system which is comprised of a two-inch diameter bubbling fluidized bed (BFB) reactor. Experiment data, apparatus information, and material data are provided by the National Renewable Energy Laboratory (NREL), the National Energy Technology Laboratory (NETL), and the Idaho National Laboratory (INL). Model development and associated results are provided by Oak Ridge National Laboratory (ORNL).
 
-\section{Experimental apparatus}
+\section{Experimental apparatus and data}
+
+Information about the fluidized bed reactor such as typical operating conditions and reactor geometry is provided in this section. Data pertaining to proximate and ultimate analysis, chemical analysis, and particle characteristics for each feedstock are also presented. Characteristics of the bed particles are also provided. Lastly, measured product yields from the fast pyrolysis of each feedstock are given in this section too.
+
+\subsection{Apparatus}
 
 The BFB pyrolysis reactor at NREL is operated at fast pyrolysis conditions to thermochemically convert biomass feedstock into gas, tar, and char products. Pyrolysis occurs in a fluidized bed reactor comprised of a bed of sand fluidized by nitrogen gas. Biomass particles are fed into the bed via an auger and secondary gas stream at the side of the reactor. An overview of the components and flows related to the pyrolysis reactor (pyrolyzer) is given in Figure \ref{fig:pyrolyzer1}. The diagram was created using information provided by NREL \cite{French-2019}.
 
@@ -118,10 +122,6 @@ Typical operating conditions of the pyrolyzer are presented in Table \ref{tab:op
         \bottomrule
     \end{tabular}
 \end{table}
-
-\section{Experimental data}
-
-Data pertaining to proximate and ultimate analysis, chemical analysis, and particle characteristics for each feedstock are presented in this section. Characteristics of the bed particles are also provided. Lastly, measured product yields from the fast pyrolysis of each feedstock are given in this section too.
 
 \subsection{Feedstock proximate and ultimate analyses}
 
@@ -713,7 +713,11 @@ Product yields measured from the fast pyrolysis of each feedstock in the fluidiz
     \label{fig:yields}
 \end{figure}
 
-\section{Biomass pyrolysis kinetics}
+\section{Model development}
+
+This section details the biomass pyrolysis kinetics scheme, biomass composition characterization method, and the reduced-order reactor models.
+
+\subsection{Biomass pyrolysis kinetics}
 
 The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite{Debiagi-2018} were used to model biomass pyrolysis in the fluidized bed reactor. Table \ref{tab:chem-kinetics} summarizes the reactions along with the associated prefactors and activation energies. A description of the chemical species in the Debiagi et al. kinetic scheme is provided in Table \ref{tab:chem-species}. Species are grouped into solid, metaplastic, gas, and liquid phases. Solid and metaplastic species are combined and compared to the reactor's char yield. All liquid species are combined and compared to the reactor's total liquid yield.
 
@@ -832,7 +836,7 @@ The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite
 \end{longtable}
 \end{center}
 
-\section{Biomass composition}
+\subsection{Biomass composition}
 
 The Debiagi kinetics rely on an initial biomass composition defined as cellulose (CELL), hemicellulose (HCELL), carbon-rich lignin (LIGC), hydrogen-rich lignin (LIGH), oxygen-rich lignin (LIGO), tannins (TANN), and triglycerides (TGL). The hemicellulose reaction mechanisms consider different types of biomass such as softwood (GMSW), hardwood (XYHW), and grass (XYGR) feedstocks. Figure \ref{fig:biocomp1} illustrates the conversion of the biomass components to pyrolysis products of liquids, solids, metaplastics, and gases as discussed in the Debiagi et al. kinetics scheme.
 
@@ -1063,7 +1067,7 @@ Figure \ref{fig:biocomp2} demonstrates the biomass composition procedure while T
     \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
 \end{longtable}
 
-\section{Batch reactor model}
+\subsection{Batch reactor model}
 
 The material balance for a typical chemical reactor is shown in Equation \ref{eq:typical-balance} where $C_0$ is inlet concentration, $C$ is outlet concentration, $v$ is volumetric flow rate, $r$ is the reaction rate, and $V$ is the reactor volume.
 
@@ -1100,13 +1104,48 @@ Reaction rates in the batch reactor model are determined from a forward rate con
 
 \noindent where $A$ is the pre-exponential factor, $T$ is the reaction temperature, $b$ is the temperature exponent, $E$ is the activation energy, and $R$ is the universal gas constant.
 
-\section{CSTR series model}
+\subsection{CSTR series model}
+
+The material balance associated with a continuous stirred tank reactor (CSTR) model for an example chemical $A$ is
+
+\begin{equation}
+    \begin{aligned}
+        accumulation &= input - output + reaction \\
+        0 &= input - output + reaction \\
+        0 &= v C_{A0} - v C_A + r_A V \\
+        C_A &= C_{A0} + r_A\;\tau
+    \end{aligned}
+\end{equation}
+
+\noindent where $v$ is the volumetric flow rate (m$^3$/s), $C_{A0}$ is the inlet concentration (mol/m$^3$), $C_A$ is the outlet concentration (mol/m$^3$), $r_A$ is the reaction rate (mol/m$^3$s), $V$ is the reactor volume (m$^3$), and $\tau$ is the residence time (s) of chemical $A$ in the reactor.
+
+\section{Results and discussion}
 
 Here.
 
 \section{Conclusions}
 
 Here.
+
+\section{Hardware requirements}
+
+The reduced order models discussed in this report were developed and executed on a MacBook Pro laptop (see hardware specs below). The models do not give as much detail as full 3D simulations but they provide good enough results in a timely manner; as such, they lend themselves well to process modeling, design of experiments, and rapid prototyping tasks.
+
+\begin{itemize}
+    \item MacBook Pro, 16-inch, 2019 model
+    \item 2.3 GHz 8-core Intel i9 CPU
+    \item 32 GB 2667 MHz DDR4 memory
+    \item 4 GB AMD Radeon Pro 5500M GPU
+    \item macOS Big Sur version 11.6
+\end{itemize}
+
+\section{Source code}
+
+Source code for this project is available on GitHub at the link provided below. See the README markdown document in the repository for more information.
+
+\begin{itemize}
+    \item \url{https://github.com/wigging/fcic-pyrolysis}
+\end{itemize}
 
 % --- References -------------------------------------------------------------
 
