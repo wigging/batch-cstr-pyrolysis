@@ -1079,7 +1079,7 @@ The material balance for a typical chemical reactor is shown in Equation \ref{eq
     \end{aligned}
 \end{equation}
 
-A batch reactor was modeled to understand the time scales associated with the biomass pyrolysis kinetics. For the batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out; therefore, Equation \ref{eq:batch-balance} represents the material balance for a batch reactor model. A depiction of a batch reactor can be seen in Figure \ref{fig:batch-reactor}. The Cantera Python package was used to model the batch reactor as an IdealGasReactor \cite{Cantera-2018}.
+A batch reactor was modeled to understand the time scales associated with the biomass pyrolysis kinetics. For the batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out; therefore, Equation \ref{eq:batch-balance} represents the material balance for a batch reactor model. A depiction of a batch reactor can be seen in Figure \ref{fig:reactor-batch}. The Cantera Python package was used to model the batch reactor as an IdealGasReactor \cite{Cantera-2018}.
 
 \begin{equation}
     \label{eq:batch-balance}
@@ -1091,14 +1091,15 @@ A batch reactor was modeled to understand the time scales associated with the bi
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.2\textwidth]{figures/batch-reactor.png}
+    \includegraphics[width=0.2\textwidth]{figures/reactor-batch.png}
     \caption{Representation of a batch reactor system. Source: Wikipedia.}
-    \label{fig:batch-reactor}
+    \label{fig:reactor-batch}
 \end{figure}
 
 Reaction rates in the batch reactor model are determined from a forward rate constant $k$ based on an Arrhenius function
 
 \begin{equation}
+    \label{eq:rate-constant}
     k = A\,T^b e^{-E / RT}
 \end{equation}
 
@@ -1106,7 +1107,7 @@ Reaction rates in the batch reactor model are determined from a forward rate con
 
 \subsection{CSTR series model}
 
-The material balance associated with a continuous stirred tank reactor (CSTR) model for an example chemical $A$ is
+The material balance associated with a continuous stirred tank reactor (CSTR) model for an example chemical is
 
 \begin{equation}
     \begin{aligned}
@@ -1117,7 +1118,16 @@ The material balance associated with a continuous stirred tank reactor (CSTR) mo
     \end{aligned}
 \end{equation}
 
-\noindent where $v$ is the volumetric flow rate (m$^3$/s), $C_{A0}$ is the inlet concentration (mol/m$^3$), $C_A$ is the outlet concentration (mol/m$^3$), $r_A$ is the reaction rate (mol/m$^3$s), $V$ is the reactor volume (m$^3$), and $\tau$ is the residence time (s) of chemical $A$ in the reactor.
+\noindent where $v$ is the volumetric flow rate (m$^3$/s), $C_{A0}$ is the inlet concentration (mol/m$^3$), $C_A$ is the outlet concentration (mol/m$^3$), $r_A$ is the reaction rate (mol/m$^3$s), $V$ is the reactor volume (m$^3$), and $\tau$ is the residence time (s) of chemical $A$ in the reactor. The reaction rate $r_A$ is determined using the rate constant $k$ from Equation \ref{eq:rate-constant} multiplied by the concentration in the tank. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{figures/reactor-cstr.png}
+    \caption{Representation of a continuous stirred-tank reactor (CSTR) system. Source: Wikipedia.}
+    \label{fig:reactor-cstr}
+\end{figure}
+
+A series of continuous stirred-tank reactor (CSTR) models were used to represent the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor.
 
 \section{Results and discussion}
 
