@@ -1067,36 +1067,18 @@ Figure \ref{fig:biocomp2} demonstrates the biomass composition procedure while T
     \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
 \end{longtable}
 
-\subsection{Batch reactor model}
+\subsection{Batch reactor and CSTR models}
 
-The material balance for a typical chemical reactor is shown in Equation \ref{eq:typical-balance} where $C_0$ is inlet concentration, $C$ is outlet concentration, $v$ is volumetric flow rate, $r$ is the reaction rate, and $V$ is the reactor volume.
+The material balance for a chemical reactor considers the inlet and outlet flows of the system along with accumulation and reaction effects
 
 \begin{equation}
-    \label{eq:typical-balance}
     \begin{aligned}
         accumulation &= input - output + reaction \\
-        \frac{dC}{dt} V &= v C_0 - v C + r V
+        \frac{dC_A}{dt} V &= v C_{A0} - v C_A + r_A V
     \end{aligned}
 \end{equation}
 
-A batch reactor was modeled to understand the time scales associated with the biomass pyrolysis kinetics. For the batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out; therefore, Equation \ref{eq:batch-balance} represents the material balance for a batch reactor model. A depiction of a batch reactor can be seen in Figure \ref{fig:reactor-batch}. The Cantera Python package was used to model the batch reactor as an IdealGasReactor \cite{Cantera-2018}.
-
-\begin{equation}
-    \label{eq:batch-balance}
-    \begin{aligned}
-        accumulation &= 0 - 0 + reaction \\
-        \frac{dC}{dt} &= r
-    \end{aligned}
-\end{equation}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.2\textwidth]{figures/reactor-batch.png}
-    \caption{Representation of a batch reactor system. Source: Wikipedia.}
-    \label{fig:reactor-batch}
-\end{figure}
-
-Reaction rates in the batch reactor model are determined from a forward rate constant $k$ based on an Arrhenius function
+\noindent where $A$ represents a chemical species, $C_A$ is the outlet concentration (mol/m$^3$), $C_{A0}$ is the inlet concentration (mol/m$^3$), $V$ is the reactor volume (m$^3$), $v$ is the volumetric flow rate (m$^3$/s), and $r_A$ is the reaction rate (mol/m$^3$s). The reaction rate is determined by multiplying a forward rate constant $k$ by the concentration in the tank. The rate constant is calculated from an Arrhenius function
 
 \begin{equation}
     \label{eq:rate-constant}
@@ -1105,25 +1087,41 @@ Reaction rates in the batch reactor model are determined from a forward rate con
 
 \noindent where $A$ is the pre-exponential factor, $T$ is the reaction temperature, $b$ is the temperature exponent, $E$ is the activation energy, and $R$ is the universal gas constant.
 
-\subsection{CSTR series model}
+A batch reactor was modeled to understand the time scales associated with the biomass pyrolysis kinetics. For a batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out resulting in the following material balance for a batch reactor model
 
-The material balance associated with a continuous stirred tank reactor (CSTR) model for an example chemical is
+\begin{equation}
+    \label{eq:batch-balance}
+    \begin{aligned}
+        accumulation &= 0 - 0 + reaction \\
+        \frac{dC_A}{dt} &= r_A
+    \end{aligned}
+\end{equation}
+
+\noindent A depiction of a batch reactor can be seen in Figure \ref{fig:reactor-batch}. The Cantera Python package was used to model the batch reactor as an IdealGasReactor \cite{Cantera-2018}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{figures/reactor-batch.png}
+    \caption{Representation of a batch reactor system. Source: Wikipedia.}
+    \label{fig:reactor-batch}
+\end{figure}
+
+To account for inlet and outlet flows, a continuous stirred tank reactor (CSTR) system at steady-state conditions was also modeled. The material balance for a steady-state CSTR does not account for accumulation but does consider the residence time in the system
 
 \begin{equation}
     \begin{aligned}
-        accumulation &= input - output + reaction \\
         0 &= input - output + reaction \\
         0 &= v C_{A0} - v C_A + r_A V \\
         C_A &= C_{A0} + r_A\;\tau
     \end{aligned}
 \end{equation}
 
-\noindent where $v$ is the volumetric flow rate (m$^3$/s), $C_{A0}$ is the inlet concentration (mol/m$^3$), $C_A$ is the outlet concentration (mol/m$^3$), $r_A$ is the reaction rate (mol/m$^3$s), $V$ is the reactor volume (m$^3$), and $\tau$ is the residence time (s) of chemical $A$ in the reactor. The reaction rate $r_A$ is determined using the rate constant $k$ from Equation \ref{eq:rate-constant} multiplied by the concentration in the tank. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}.
+\noindent where $\tau$ is the residence time (s) of chemical $A$ in the reactor. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}. The Cantera Python package was used to model the CSTR using an IdealGasReactor with inlet and outlet flows \cite{Cantera-2018}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.25\textwidth]{figures/reactor-cstr.png}
-    \caption{Representation of a continuous stirred-tank reactor (CSTR) system. Source: Wikipedia.}
+    \caption{Representation of a continuous stirred-tank reactor (CSTR) system with inlet and outlet flows. Source: Wikipedia.}
     \label{fig:reactor-cstr}
 \end{figure}
 
