@@ -266,4 +266,11 @@ To account for inlet and outlet flows, a continuous stirred tank reactor (CSTR) 
     \label{fig:reactor-cstr}
 \end{figure}
 
-A series of continuous stirred-tank reactor (CSTR) models were used to represent the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor.
+A series of continuous stirred-tank reactor (CSTR) models were used to model the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor. The residence time for each feedstock was obtained from CFD simulations performed by NETL. As the number of CSTRs increases, the reactor model behaves more like a plug flow reactor (PFR). The modeling technique is illustrated by Figure \ref{fig:reactor-cstr-series} where the $N$ subscript represents the total number of CSTRs.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/reactor-cstr-series.pdf}
+    \caption{Depiction of a bubbling fluidized bed reactor modeled as a series of CSTRs.}
+    \label{fig:reactor-cstr-series}
+\end{figure}
