@@ -335,16 +335,16 @@ Similarly, the ultimate analysis data was also converted to different bases usin
     X_{cho} &= X_{daf} \times \frac{100}{100 - N_{daf} - S_{daf}} \label{eq:cho-basis}
 \end{align}
 
-For the chemical analysis data, the given dry basis values $P_d$ are converted to a dry ash-free basis $P_{daf}$ using Equation \ref{eq:chem-daf} where $P_{s.\,inorg.}$ is the structural inorganics and $P_{ns.\,inorg.}$ is the non-structural inorganics.
+For the chemical analysis data, the given dry basis values $P_d$ are converted to a dry ash-free basis $P_{daf}$ using Equation \ref{eq:chem-daf} where $P_{struct}$ is the structural inorganics, $P_{nonstruct}$ is the non-structural inorganics, and $P_{d,\,total}$ is the sum of the dry basis values.
 
 \begin{equation}
     \label{eq:chem-daf}
-    P_{daf} = P_d \times \frac{100}{\sum P_d - P_{s.\,inorg.} - P_{ns.\,inorg.}}
+    P_{daf} = P_d \times \frac{100}{P_{d,\,total} - P_{struct} - P_{nonstruct}}
 \end{equation}
 
 \subsection{Biomass pyrolysis kinetics}
 
-The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite{Debiagi-2018} were used to model biomass pyrolysis in the fluidized bed reactor. Table \ref{tab:chem-kinetics} summarizes the reactions along with the associated prefactors and activation energies. A description of the chemical species in the Debiagi et al. kinetic scheme is provided in Table \ref{tab:chem-species}. Species are grouped into solid, metaplastic, gas, and liquid phases. Solid and metaplastic species are combined and compared to the reactor's char yield. All liquid species are combined and compared to the reactor's total liquid yield.
+The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite{Debiagi-2018} were used to model biomass pyrolysis in the fluidized bed reactor. Table \ref{tab:chem-kinetics} summarizes the reactions along with the associated prefactors and activation energies. A description of the chemical species in the Debiagi et al. kinetic scheme is provided in Table \ref{tab:chem-species}.
 
 % \setlength\LTleft{-0.2in}
 % \setlength\LTright{-0.2in}
@@ -461,9 +461,7 @@ The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite
 \end{longtable}
 \end{center}
 
-\subsection{Biomass composition}
-
-The Debiagi kinetics rely on an initial biomass composition defined as cellulose (CELL), hemicellulose (HCELL), carbon-rich lignin (LIGC), hydrogen-rich lignin (LIGH), oxygen-rich lignin (LIGO), tannins (TANN), and triglycerides (TGL). The hemicellulose reaction mechanisms consider different types of biomass such as softwood (GMSW), hardwood (XYHW), and grass (XYGR) feedstocks. Figure \ref{fig:biocomp1} illustrates the conversion of the biomass components to pyrolysis products of liquids, solids, metaplastics, and gases as discussed in the Debiagi et al. kinetics scheme.
+The Debiagi kinetics rely on an initial biomass composition defined as cellulose (CELL), hemicellulose (HCELL), carbon-rich lignin (LIGC), hydrogen-rich lignin (LIGH), oxygen-rich lignin (LIGO), tannins (TANN), and triglycerides (TGL). The hemicellulose reaction mechanisms consider different types of biomass such as softwood (GMSW), hardwood (XYHW), and grass (XYGR) feedstocks. Products generated from the biomass pyrolysis are grouped into solid, metaplastic, gas, and liquid phases. Solid and metaplastic species are combined and compared to the NREL reactor's char yield. All liquid species are combined and compared to the reactor's total liquid yield. Figure \ref{fig:biocomp1} illustrates the conversion of the biomass components to pyrolysis products of liquids, solids, metaplastics, and gases as discussed in the Debiagi et al. kinetics scheme.
 
 \begin{figure}[H]
     \centering
@@ -471,6 +469,8 @@ The Debiagi kinetics rely on an initial biomass composition defined as cellulose
     \caption{Seven biomass components convert to pyrolysis products according to the Debiagi et al. biomass pyrolysis kinetics scheme.}
     \label{fig:biocomp1}
 \end{figure}
+
+\subsection{Biomass composition}
 
 According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical components of the biomass are defined as shown in Table \ref{tab:chem-components}. The Debiagi paper does not provide information on how to experimentally determine these components. However, the paper provides a characterization method which estimates the biomass composition based on elemental (ultimate) analysis data. The characterization method uses the carbon (C) and hydrogen (H) content of the biomass to predict the biochemical composition in terms of cellulose, hemicellulose, lignin, tannins, and triglycerides. Splitting parameters $\alpha$, $\beta$, $\gamma$, $\delta$, and $\epsilon$ are used to improve the validity of the characterization procedure by accounting for extractives in the biomass.
 
@@ -503,15 +503,13 @@ According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical com
 
 As discussed previously, the largest differences in the chemical analysis feedstock data are for the lignin, glucan, and mannan fractions. These fractions represent the cellulose (glucan), hemicellulose (xylan, galactan, arabinan, mannan, acetyl), and total lignin components of the biomass composition. Unfortunately, the chemical analysis data does not directly relate to all the biomass components needed for the pyrolysis kinetics.
 
-Using the C and H values from the ultimate analysis data and default values for the splitting parameters, the biomass composition is estimated using the characterization method from Debiagi et al. The estimated cellulose, hemicellulose, and total lignin (LIGC + LIGH + LIGO) values are compared to the chemical analysis data using a minimization function
+Using the C and H values from the ultimate analysis CHO basis and default values for the splitting parameters, the biomass composition is estimated using the characterization method from Debiagi et al. The estimated cellulose, hemicellulose, and total lignin (LIGC + LIGH + LIGO) values are compared to the chemical analysis measurements using
 
 \begin{equation}
-    \sum (a - b)^2
+    f(x) = (cell_{est} - cell_{meas})^2 + (hemi_{est} - hemi_{meas})^2 + (lignin_{est} - lignin_{meas})^2
 \end{equation}
 
-\noindent where $a$ is the cellulose, hemicellulose, and total lignin estimated from the characterization method and $b$ is the cellulose, hemicellulose, and lignin from the chemical analysis data. The L-BFGS-B algorithm is applied to the minimization function to generate the optimum splitting parameter values such that the cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data.
-
-Figure \ref{fig:biocomp2} demonstrates the biomass composition procedure while Table \ref{tab:biocomp3} presents the biomass compositions for each FCIC feedstock that is suitable to use with the Debiagi et al. kinetics scheme. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis values.
+\noindent where $f$ is the function to be minimized, $cell_{est}$ is the estimated cellulose, $cell_{meas}$ is the cellulose from chemical analysis, $hemi_{est}$ is the estimated hemicellulose, $hemi_{meas}$ is the hemicellulose from chemical analysis, $lignin_{est}$ is the estimated lignin, and $lignin_{meas}$ is the lignin from chemical analysis. The L-BFGS-B algorithm is applied to the minimization function to generate the optimum splitting parameter values such that the cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data. Figure \ref{fig:biocomp2} demonstrates the biomass composition minimization procedure.
 
 \begin{figure}[H]
     \centering
@@ -519,178 +517,6 @@ Figure \ref{fig:biocomp2} demonstrates the biomass composition procedure while T
     \caption{Biomass composition determined from ultimate analysis data and compared with measured chemical analysis data for cellulose, hemicellulose, and total lignin.}
     \label{fig:biocomp2}
 \end{figure}
-
-\begin{longtable}{p{8cm}rr}
-    \caption{Estimated biomass composition for each feedstock on a dry ash-free basis (daf). Left daf column based on chemical analysis data. Right daf column estimated from the characterization procedure using the optimized splitting parameter values.}
-    \label{tab:biocomp3} \\
-    \textbf{Residues, Cycle 1} & daf & daf \\
-    \midrule
-    cellulose       & 28.98  & 28.98 \\
-    hemicellulose   & 22.02  & 22.02 \\
-    lignin-c        & --     & 0.58 \\
-    lignin-h        & --     & 8.79 \\
-    lignin-o        & --     & 27.16 \\
-    tannins         & --     & 1.60 \\
-    triglycerides   & --     & 10.88 \\
-    total lignin    & 36.53  & 36.53 \\
-    \\
-    \multicolumn{3}{l}{C = 53.31, H = 6.41} \\
-    \multicolumn{3}{l}{$\alpha = 0.5175$, $\beta = 0.8996$, $\gamma = 1$, $\delta = 0.6486$, $\epsilon = 0.9246$} \\
-    \\
-    \textbf{Stem wood, Cycle 2} & daf & daf \\
-    \midrule
-    cellulose     & 39.31 & 39.91 \\
-    hemicellulose & 24.84 & 25.42 \\
-    lignin-c      & --    & 0.89 \\
-    lignin-h      & --    & 26.20 \\
-    lignin-o      & --    & 3.20 \\
-    tannins       & --    & 0.01 \\
-    triglycerides & --    & 4.37 \\
-    total lignin  & 30.29 & 30.29 \\
-    \\
-    \multicolumn{3}{l}{C = 50.94, H = 6.39} \\
-    \multicolumn{3}{l}{$\alpha = 0.5613$, $\beta = 0.981$, $\gamma = 0.7683$, $\delta = 0.9263$, $\epsilon = 0.9958$} \\
-    \\
-    \textbf{Bark, Cycle 3} & daf & daf \\
-    \midrule
-    cellulose     & 33.78 & 31.38 \\
-    hemicellulose & 25.24 & 22.99 \\
-    lignin-c      & --    & 35.14 \\
-    lignin-h      & --    & 0 \\
-    lignin-o      & --    & 0 \\
-    tannins       & --    & 7.15 \\
-    triglycerides & --    & 3.34 \\
-    total lignin  & 34.29 & 35.14 \\
-    \\
-    \multicolumn{3}{l}{C = 55.69, H = 5.89} \\
-    \multicolumn{3}{l}{$\alpha = 0.5265$, $\beta = 0.3359$, $\gamma = 0$, $\delta = 0$, $\epsilon = 0.8527$} \\
-    \\
-    \textbf{Needles, Cycle 4} & daf & daf \\
-    \midrule
-    cellulose     & 23.59 & 23.59 \\
-    hemicellulose & 17.57 & 17.57 \\
-    lignin-c      & --    & 0.63 \\
-    lignin-h      & --    & 5.43 \\
-    lignin-o      & --    & 37.30 \\
-    tannins       & --    & 3.00 \\
-    triglycerides & --    & 12.48 \\
-    total lignin  & 43.35 & 43.35 \\
-    \\
-    \multicolumn{3}{l}{C = 54.71, H = 6.36} \\
-    \multicolumn{3}{l}{$\alpha = 0.5225$, $\beta = 0.8364$, $\gamma = 1$, $\delta = 0.5167$, $\epsilon = 0.8996$} \\
-    \\
-    \textbf{Bark + needles, Cycle 5} & daf & daf \\
-    \midrule
-    cellulose     & 23.91 & 23.91 \\
-    hemicellulose & 16.82 & 16.82 \\
-    lignin-c      & --    & 6.94 \\
-    lignin-h      & --    & 6.74 \\
-    lignin-o      & --    & 34.53 \\
-    tannins       & --    & 2.84 \\
-    triglycerides & --    & 8.22 \\
-    total lignin  & 48.21 & 48.21 \\
-    \\
-    \multicolumn{3}{l}{C = 54.79, H = 6.13} \\
-    \multicolumn{3}{l}{$\alpha = 0.5366$, $\beta = 0.7312$, $\gamma = 0.7942$, $\delta = 0.6975$, $\epsilon = 0.9169$} \\
-    \\
-    \textbf{Residues (rep 1), Cycle 8} & daf & daf \\
-    \midrule
-    cellulose     & 27.44 & 27.45 \\
-    hemicellulose & 20.80 & 20.81 \\
-    lignin-c      & --    & 0 \\
-    lignin-h      & --    & 3.71 \\
-    lignin-o      & --    & 32.79 \\
-    tannins       & --    & 1.98 \\
-    triglycerides & --    & 13.27 \\
-    total lignin  & 36.49 & 36.50 \\
-    \\
-    \multicolumn{3}{l}{C = 53.85, H = 6.46} \\
-    \multicolumn{3}{l}{$\alpha = 0.5181$, $\beta = 1$, $\gamma = 1$, $\delta = 0.365$, $\epsilon = 0.9228$} \\
-    \\
-    \textbf{Residues:bark:needles 1:1:1, Cycle 10} & daf & daf \\
-    \midrule
-    cellulose     & 24.05 & 24.05 \\
-    hemicellulose & 18.62 & 18.62 \\
-    lignin-c      & --    & 7.27 \\
-    lignin-h      & --    & 3.93 \\
-    lignin-o      & --    & 32.08 \\
-    tannins       & --    & 3.89 \\
-    triglycerides & --    & 10.16 \\
-    total lignin  & 43.28 & 43.28 \\
-    \\
-    \multicolumn{3}{l}{C = 54.91, H = 6.22} \\
-    \multicolumn{3}{l}{$\alpha = 0.5128$, $\beta = 0.6851$, $\gamma = 0.7597$, $\delta = 0.5375$, $\epsilon = 0.8866$} \\
-    \\
-    \textbf{Residues:bark:needles 1:2:2, Cycle 11} & daf & daf \\
-    \midrule
-    cellulose     & 23.98 & 23.99 \\
-    hemicellulose & 17.43 & 17.43 \\
-    lignin-c      & --    & 10.51 \\
-    lignin-h      & --    & 3.27 \\
-    lignin-o      & --    & 31.12 \\
-    tannins       & --    & 4.59 \\
-    triglycerides & --    & 9.10 \\
-    total lignin  & 44.89 & 44.89 \\
-    \\
-    \multicolumn{3}{l}{C = 55.25, H = 6.14} \\
-    \multicolumn{3}{l}{$\alpha = 0.5285$, $\beta = 0.6664$, $\gamma = 0.6661$, $\delta = 0.5255$, $\epsilon = 0.88$} \\
-    \\
-    \textbf{Air classified (10 Hz), Cycle 12} & daf & daf \\
-    \midrule
-    cellulose     & 32.44 & 32.44 \\
-    hemicellulose & 24.13 & 24.13 \\
-    lignin-c      & --    & 4.82 \\
-    lignin-h      & --    & 13.86 \\
-    lignin-o      & --    & 16.93 \\
-    tannins       & --    & 0 \\
-    triglycerides & --    & 7.83 \\
-    total lignin  & 35.60 & 35.60 \\
-    \\
-    \multicolumn{3}{l}{C = 52.74, H = 6.37} \\
-    \multicolumn{3}{l}{$\alpha = 0.5228$, $\beta = 0.7661$, $\gamma = 0.8174$, $\delta = 0.8261$, $\epsilon = 1$} \\
-    \\
-    \textbf{Air classified (28 Hz), Cycle 13} & daf & daf \\
-    \midrule
-    cellulose     & 34.37 & 34.37 \\
-    hemicellulose & 25.94 & 25.94 \\
-    lignin-c      & --    & 3.76 \\
-    lignin-h      & --    & 18.38 \\
-    lignin-o      & --    & 13.09 \\
-    tannins       & --    & 0 \\
-    triglycerides & --    & 4.46 \\
-    total lignin  & 35.23 & 35.23 \\
-    \\
-    \multicolumn{3}{l}{C = 51.67, H = 6.26} \\
-    \multicolumn{3}{l}{$\alpha = 0.5191$, $\beta = 0.8365$, $\gamma = 0.8302$, $\delta = 0.9101$, $\epsilon = 0.9996$} \\
-    \\
-    \textbf{Whole tree (13 yr), Cycle 15} & daf & daf \\
-    \midrule
-    cellulose     & 34.12 & 34.13 \\
-    hemicellulose & 25.50 & 25.50 \\
-    lignin-c      & --    & 0.91 \\
-    lignin-h      & --    & 16.12 \\
-    lignin-o      & --    & 16.60 \\
-    tannins       & --    & 0.66 \\
-    triglycerides & --    & 6.08 \\
-    total lignin  & 33.63 & 33.63 \\
-    \\
-    \multicolumn{3}{l}{C = 51.63, H = 6.31} \\
-    \multicolumn{3}{l}{$\alpha = 0.5216$, $\beta = 1$, $\gamma = 0.9175$, $\delta = 0.845$, $\epsilon = 0.9517$} \\
-    \\
-    \textbf{Stem wood (13 yr), Cycle 16} & daf & daf \\
-    \midrule
-    cellulose     & 37.46 & 37.46 \\
-    hemicellulose & 26.14 & 26.14 \\
-    lignin-c      & --    & 1.84 \\
-    lignin-h      & --    & 24.58 \\
-    lignin-o      & --    & 6.38 \\
-    tannins       & --    & 0.01 \\
-    triglycerides & --    & 3.59 \\
-    total lignin  & 32.80 & 32.80 \\
-    \\
-    \multicolumn{3}{l}{C = 51.07, H = 6.31} \\
-    \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
-\end{longtable}
 
 \subsection{Batch reactor and CSTR models}
 
@@ -1030,6 +856,180 @@ Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} an
         \bottomrule
     \end{tabular}
 \end{table}
+
+Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock that are suitable to use with the Debiagi et al. kinetics scheme. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis values.
+
+\begin{longtable}{p{8cm}rr}
+    \caption{Estimated biomass composition for each feedstock on a dry ash-free basis (DAF). Chemical analysis values are listed in the Measured column. Values from the biomass characterization procedure using the optimized splitting parameters are given in the Estimated column.}
+    \label{tab:biocomp3} \\
+    \textbf{Residues, Cycle 1} & Measured & Estimated \\
+    \midrule
+    cellulose       & 28.98  & 28.98 \\
+    hemicellulose   & 22.02  & 22.02 \\
+    lignin-c        & --     & 0.58 \\
+    lignin-h        & --     & 8.79 \\
+    lignin-o        & --     & 27.16 \\
+    tannins         & --     & 1.60 \\
+    triglycerides   & --     & 10.88 \\
+    total lignin    & 36.53  & 36.53 \\
+    \\
+    \multicolumn{3}{l}{C = 53.31, H = 6.41} \\
+    \multicolumn{3}{l}{$\alpha = 0.5175$, $\beta = 0.8996$, $\gamma = 1$, $\delta = 0.6486$, $\epsilon = 0.9246$} \\
+    \\
+    \textbf{Stem wood, Cycle 2} & daf & daf \\
+    \midrule
+    cellulose     & 39.31 & 39.91 \\
+    hemicellulose & 24.84 & 25.42 \\
+    lignin-c      & --    & 0.89 \\
+    lignin-h      & --    & 26.20 \\
+    lignin-o      & --    & 3.20 \\
+    tannins       & --    & 0.01 \\
+    triglycerides & --    & 4.37 \\
+    total lignin  & 30.29 & 30.29 \\
+    \\
+    \multicolumn{3}{l}{C = 50.94, H = 6.39} \\
+    \multicolumn{3}{l}{$\alpha = 0.5613$, $\beta = 0.981$, $\gamma = 0.7683$, $\delta = 0.9263$, $\epsilon = 0.9958$} \\
+    \\
+    \textbf{Bark, Cycle 3} & daf & daf \\
+    \midrule
+    cellulose     & 33.78 & 31.38 \\
+    hemicellulose & 25.24 & 22.99 \\
+    lignin-c      & --    & 35.14 \\
+    lignin-h      & --    & 0 \\
+    lignin-o      & --    & 0 \\
+    tannins       & --    & 7.15 \\
+    triglycerides & --    & 3.34 \\
+    total lignin  & 34.29 & 35.14 \\
+    \\
+    \multicolumn{3}{l}{C = 55.69, H = 5.89} \\
+    \multicolumn{3}{l}{$\alpha = 0.5265$, $\beta = 0.3359$, $\gamma = 0$, $\delta = 0$, $\epsilon = 0.8527$} \\
+    \\
+    \textbf{Needles, Cycle 4} & daf & daf \\
+    \midrule
+    cellulose     & 23.59 & 23.59 \\
+    hemicellulose & 17.57 & 17.57 \\
+    lignin-c      & --    & 0.63 \\
+    lignin-h      & --    & 5.43 \\
+    lignin-o      & --    & 37.30 \\
+    tannins       & --    & 3.00 \\
+    triglycerides & --    & 12.48 \\
+    total lignin  & 43.35 & 43.35 \\
+    \\
+    \multicolumn{3}{l}{C = 54.71, H = 6.36} \\
+    \multicolumn{3}{l}{$\alpha = 0.5225$, $\beta = 0.8364$, $\gamma = 1$, $\delta = 0.5167$, $\epsilon = 0.8996$} \\
+    \\
+    \textbf{Bark + needles, Cycle 5} & daf & daf \\
+    \midrule
+    cellulose     & 23.91 & 23.91 \\
+    hemicellulose & 16.82 & 16.82 \\
+    lignin-c      & --    & 6.94 \\
+    lignin-h      & --    & 6.74 \\
+    lignin-o      & --    & 34.53 \\
+    tannins       & --    & 2.84 \\
+    triglycerides & --    & 8.22 \\
+    total lignin  & 48.21 & 48.21 \\
+    \\
+    \multicolumn{3}{l}{C = 54.79, H = 6.13} \\
+    \multicolumn{3}{l}{$\alpha = 0.5366$, $\beta = 0.7312$, $\gamma = 0.7942$, $\delta = 0.6975$, $\epsilon = 0.9169$} \\
+    \\
+    \textbf{Residues (rep 1), Cycle 8} & daf & daf \\
+    \midrule
+    cellulose     & 27.44 & 27.45 \\
+    hemicellulose & 20.80 & 20.81 \\
+    lignin-c      & --    & 0 \\
+    lignin-h      & --    & 3.71 \\
+    lignin-o      & --    & 32.79 \\
+    tannins       & --    & 1.98 \\
+    triglycerides & --    & 13.27 \\
+    total lignin  & 36.49 & 36.50 \\
+    \\
+    \multicolumn{3}{l}{C = 53.85, H = 6.46} \\
+    \multicolumn{3}{l}{$\alpha = 0.5181$, $\beta = 1$, $\gamma = 1$, $\delta = 0.365$, $\epsilon = 0.9228$} \\
+    \\
+    \textbf{Residues:bark:needles 1:1:1, Cycle 10} & daf & daf \\
+    \midrule
+    cellulose     & 24.05 & 24.05 \\
+    hemicellulose & 18.62 & 18.62 \\
+    lignin-c      & --    & 7.27 \\
+    lignin-h      & --    & 3.93 \\
+    lignin-o      & --    & 32.08 \\
+    tannins       & --    & 3.89 \\
+    triglycerides & --    & 10.16 \\
+    total lignin  & 43.28 & 43.28 \\
+    \\
+    \multicolumn{3}{l}{C = 54.91, H = 6.22} \\
+    \multicolumn{3}{l}{$\alpha = 0.5128$, $\beta = 0.6851$, $\gamma = 0.7597$, $\delta = 0.5375$, $\epsilon = 0.8866$} \\
+    \\
+    \textbf{Residues:bark:needles 1:2:2, Cycle 11} & daf & daf \\
+    \midrule
+    cellulose     & 23.98 & 23.99 \\
+    hemicellulose & 17.43 & 17.43 \\
+    lignin-c      & --    & 10.51 \\
+    lignin-h      & --    & 3.27 \\
+    lignin-o      & --    & 31.12 \\
+    tannins       & --    & 4.59 \\
+    triglycerides & --    & 9.10 \\
+    total lignin  & 44.89 & 44.89 \\
+    \\
+    \multicolumn{3}{l}{C = 55.25, H = 6.14} \\
+    \multicolumn{3}{l}{$\alpha = 0.5285$, $\beta = 0.6664$, $\gamma = 0.6661$, $\delta = 0.5255$, $\epsilon = 0.88$} \\
+    \\
+    \textbf{Air classified (10 Hz), Cycle 12} & daf & daf \\
+    \midrule
+    cellulose     & 32.44 & 32.44 \\
+    hemicellulose & 24.13 & 24.13 \\
+    lignin-c      & --    & 4.82 \\
+    lignin-h      & --    & 13.86 \\
+    lignin-o      & --    & 16.93 \\
+    tannins       & --    & 0 \\
+    triglycerides & --    & 7.83 \\
+    total lignin  & 35.60 & 35.60 \\
+    \\
+    \multicolumn{3}{l}{C = 52.74, H = 6.37} \\
+    \multicolumn{3}{l}{$\alpha = 0.5228$, $\beta = 0.7661$, $\gamma = 0.8174$, $\delta = 0.8261$, $\epsilon = 1$} \\
+    \\
+    \textbf{Air classified (28 Hz), Cycle 13} & daf & daf \\
+    \midrule
+    cellulose     & 34.37 & 34.37 \\
+    hemicellulose & 25.94 & 25.94 \\
+    lignin-c      & --    & 3.76 \\
+    lignin-h      & --    & 18.38 \\
+    lignin-o      & --    & 13.09 \\
+    tannins       & --    & 0 \\
+    triglycerides & --    & 4.46 \\
+    total lignin  & 35.23 & 35.23 \\
+    \\
+    \multicolumn{3}{l}{C = 51.67, H = 6.26} \\
+    \multicolumn{3}{l}{$\alpha = 0.5191$, $\beta = 0.8365$, $\gamma = 0.8302$, $\delta = 0.9101$, $\epsilon = 0.9996$} \\
+    \\
+    \textbf{Whole tree (13 yr), Cycle 15} & daf & daf \\
+    \midrule
+    cellulose     & 34.12 & 34.13 \\
+    hemicellulose & 25.50 & 25.50 \\
+    lignin-c      & --    & 0.91 \\
+    lignin-h      & --    & 16.12 \\
+    lignin-o      & --    & 16.60 \\
+    tannins       & --    & 0.66 \\
+    triglycerides & --    & 6.08 \\
+    total lignin  & 33.63 & 33.63 \\
+    \\
+    \multicolumn{3}{l}{C = 51.63, H = 6.31} \\
+    \multicolumn{3}{l}{$\alpha = 0.5216$, $\beta = 1$, $\gamma = 0.9175$, $\delta = 0.845$, $\epsilon = 0.9517$} \\
+    \\
+    \textbf{Stem wood (13 yr), Cycle 16} & daf & daf \\
+    \midrule
+    cellulose     & 37.46 & 37.46 \\
+    hemicellulose & 26.14 & 26.14 \\
+    lignin-c      & --    & 1.84 \\
+    lignin-h      & --    & 24.58 \\
+    lignin-o      & --    & 6.38 \\
+    tannins       & --    & 0.01 \\
+    triglycerides & --    & 3.59 \\
+    total lignin  & 32.80 & 32.80 \\
+    \\
+    \multicolumn{3}{l}{C = 51.07, H = 6.31} \\
+    \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
+\end{longtable}
 
 \subsection{Batch reactor model}
 
