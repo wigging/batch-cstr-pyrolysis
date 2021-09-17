@@ -6,7 +6,7 @@ Feedstock characterization, batch reactor, and CSTR model results are discussed 
 
 \subsection{Feedstock characterization}
 
-Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as-determined (AD), as-received (AR), dry (D), dry ash-free (DAF), and CHO basis. The reported H and O for the ultimate analysis data does not include the H and O in the moisture; therefore, the total value for the as-determined basis excludes the moisture percentage for the ultimate analysis.
+Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as-determined (AD), as-received (AR), dry (D), dry ash-free (DAF), and CHO basis. The reported H and O for the ultimate analysis data does not include the H and O in the moisture; therefore, the total value for the as-determined basis (AD column) excludes the moisture percentage.
 
 \newpage
 \begin{longtable}{lrrrrr}
@@ -229,7 +229,7 @@ Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as
     total    & 100.01 & 100.01 & 100.01 & 100.01 & 100.01 \\
 \end{longtable}
 
-Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} and \ref{tab:chemical-2}, the dry ash-free basis (DAF) values were calculated as shown in Tables \ref{tab:chemical-values-1} and \ref{tab:chemical-values-2}. These values are used in the reactor models as the initial concentration representing each feedstock.
+Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} and \ref{tab:chemical-2}, the dry ash-free basis (DAF) values are calculated using Equation \ref{eq:chem-daf}. The DAF values are shown in Tables \ref{tab:chemical-values-1} and \ref{tab:chemical-values-2}. These values represent the measured cellulose, hemicellulose, and lignin fractions used in the optimization procedure for the biomass composition.
 
 \begin{table}[H]
     \caption{Chemical analysis values calculated as weight percent (wt. \%) dry ash-free basis (DAF).}
@@ -279,10 +279,10 @@ Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} an
     \end{tabular}
 \end{table}
 
-Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock that are suitable to use with the Debiagi et al. kinetics scheme. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis values.
+Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock that are suitable to use with the Debiagi et al. kinetics scheme. Chemical analysis values are listed in the Measured column while values from the biomass characterization procedure using the optimized splitting parameters are given in the Estimated column. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis measurements.
 
 \begin{longtable}{p{8cm}rr}
-    \caption{Estimated biomass composition for each feedstock on a dry ash-free basis (DAF). Chemical analysis values are listed in the Measured column. Values from the biomass characterization procedure using the optimized splitting parameters are given in the Estimated column.}
+    \caption{Estimated biomass composition for each feedstock on a dry ash-free basis (DAF).}
     \label{tab:biocomp3} \\
     \textbf{Residues, Cycle 1} & Measured & Estimated \\
     \midrule
@@ -452,6 +452,15 @@ Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock th
     \multicolumn{3}{l}{C = 51.07, H = 6.31} \\
     \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
 \end{longtable}
+
+The biomass characterization of the Residues feedstock is visually shown in Figure \ref{fig:biocomp-diagram}. The feedstock's carbon-to-hydrogen ratio (CHO basis) obtained from chemical analysis data is marked with a triangle symbol. The reference mixtures obtained from the optimized splitting parameters are marked with square symbols that bound the feedstock with a dashed line.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/biocomp-diagram.pdf}
+    \caption{Characterization of the Residues feedstock using ultimate analysis data, chemical analysis data, and optimized splitting parameters.}
+    \label{fig:biocomp-diagram}
+\end{figure}
 
 \subsection{Batch reactor model}
 
