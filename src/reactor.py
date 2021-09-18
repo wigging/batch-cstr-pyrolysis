@@ -51,7 +51,7 @@ def run_batch_simulation(cti, pressure, temp, time, y0, energy):
     return states
 
 
-def run_cstr_simulation(cti, diam, length, n_cstrs, pressure, tau, temp, y0, energy='off'):
+def run_cstr_simulation(cti, diam, length, n_cstrs, pressure, tau, temp, y0, energy):
     """
     Run the CSTR simulation.
     """

@@ -112,7 +112,7 @@ for i, feedstock in enumerate(feedstocks):
           'LIGO': ligo, 'TANN': tann, 'TGL': tgl, 'ACQUA': y0_h2o}
 
     # Run CSTR simulation
-    states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0)
+    states = rct.run_cstr_simulation(cti, diam, length, n_cstrs, p, tau, temp, y0, energy)
 
     # Mass fractions of phases and nitrogen gas in each CSTR (N₂ basis)
     y_n2 = states('N2').Y[:, 0]
