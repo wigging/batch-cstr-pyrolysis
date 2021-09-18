@@ -274,3 +274,11 @@ A series of continuous stirred-tank reactor (CSTR) models were used to model the
     \caption{Depiction of a bubbling fluidized bed reactor modeled as a series of CSTRs.}
     \label{fig:reactor-cstr-series}
 \end{figure}
+
+To exclude the nitrogen gas fraction from the calculated CSTR product yields, the mass fractions are converted from a N$_2$ basis to a N$_2$ free basis
+
+\begin{equation}
+    Y_{i,\,N_2\,free} = \frac{Y_{i,\,N_2}}{Y_{gas,\,N_2} + Y_{liquid,\,N_2} + Y_{solid,\,N_2} + Y_{metaplastic,\,N_2} - Y_{N_2}}
+\end{equation}
+
+\noindent where $Y$ is the mass fraction, and $i$ represents the gas, liquid, solid, and metaplastic phases.
