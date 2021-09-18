@@ -32,7 +32,7 @@ sp_metaplastics = (
     'GH2', 'GC2H6')
 
 
-def run_batch_simulation(cti, pressure, temp, time, y0, energy='off'):
+def run_batch_simulation(cti, pressure, temp, time, y0, energy):
     """
     Run the batch reactor simulation.
     """

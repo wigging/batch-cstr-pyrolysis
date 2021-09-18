@@ -79,7 +79,7 @@ for i in range(n):
     y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
           'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
+    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy)
 
     y_chemical[i] = states(chemical).Y[-1]
     # y_chemical[i] = states(*chemical).Y.sum(axis=1)[-1]

@@ -71,7 +71,7 @@ y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
 
 for i in range(ntemps):
     temp = temps[i]
-    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
+    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy)
 
     # Mass fractions of the phases at each time step for a defined temperature
     yt_gas[i] = states(*sp_gases).Y.sum(axis=1)

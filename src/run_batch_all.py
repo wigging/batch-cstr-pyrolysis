@@ -71,7 +71,7 @@ for i, feedstock in enumerate(feedstocks):
     y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
           'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
+    states = rct.run_batch_simulation(cti, p, temp, time, y0, energy)
 
     # Chemical species representing each phase
     sp_gases = rct.sp_gases

@@ -39,7 +39,7 @@ cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 with open("data/feedstocks.json") as json_file:
     fdata = json.load(json_file)
 
-feedstock = Feedstock(fdata[1])     # change index to choose feedstock
+feedstock = Feedstock(fdata[0])     # change index to choose feedstock
 
 # Biomass composition
 # ----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ yh2o = feedstock.prox_ad[3] / 100
 y0 = {'CELL': cell, 'GMSW': hemi, 'LIGC': ligc, 'LIGH': ligh, 'LIGO': ligo,
       'TANN': tann, 'TGL': tgl, 'ACQUA': yh2o}
 
-states = rct.run_batch_simulation(cti, p, temp, time, y0, energy='off')
+states = rct.run_batch_simulation(cti, p, temp, time, y0, energy)
 
 # Chemical species representing each phase
 sp_gases = rct.sp_gases
