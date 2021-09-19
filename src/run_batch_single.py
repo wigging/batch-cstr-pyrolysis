@@ -31,7 +31,7 @@ p = 101325.0                        # reactor pressure [Pa]
 time = np.linspace(0, 20.0, 100)    # reaction time steps [s]
 
 energy = 'off'                      # reactor energy
-cti = 'data/debiagi_sw.cti'    # Cantera input file
+cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 
 # Feedstock
 # ----------------------------------------------------------------------------

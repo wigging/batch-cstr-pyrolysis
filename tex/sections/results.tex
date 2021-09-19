@@ -464,7 +464,7 @@ The biomass characterization of the Residues feedstock is visually shown in Figu
 
 \subsection{Batch reactor model}
 
-To understand the time-scale and conversion profiles associated with the Debiagi biomass pyrolysis kinetics, the batch reactor model was implemented with the Residues feedstock. Reaction time in the batch model was set to 20 s, a constant reaction temperature of 773.15 K, and a pressure of 101,325 Pa. Figure \ref{fig:batch-biocomp} displays the conversion of the initial biomass concentration with respect to time. All biomass fractions are converted to products within 10 s except for the tannins. All pyrolysis products appear to be generated within 10 s of reaction time as demonstrated by Figure \ref{fig:batch-products}. Final mixture yields are approximately 15\% gas, 57\% liquids, 13\% solids, and 14\% metaplastics which suggests a total solids yield of 27\%.
+To understand the time-scale and conversion profiles associated with the Debiagi biomass pyrolysis kinetics, the batch reactor model was implemented with the Residues feedstock. Reaction time in the batch model was set to 20 s, a constant reaction temperature of 773.15 K, and a pressure of 101,325 Pa. Figure \ref{fig:batch-biocomp} displays the conversion of the initial biomass concentration with respect to time. All biomass fractions are converted to products within 10 s except for the tannins. All pyrolysis products appear to be generated within 10 s of reaction time as demonstrated by Figure \ref{fig:batch-products}. Final mixture yields are approximately 15 wt. \% gas, 57 wt. \% liquids, 13 wt. \% solids, and 14 wt. \% metaplastics which suggests a total solids yield of 27 wt. \%.
 
 \begin{figure}[H]
     \centering
@@ -480,7 +480,15 @@ To understand the time-scale and conversion profiles associated with the Debiagi
     \label{fig:batch-products}
 \end{figure}
 
-According to the experimental data from the NREL 2FBR, the char yield for the Residues feedstock is around 15\% compared to the batch reactor model's 27\% total solids yield. A majority of the solids yield from the batch reactor model is due to the metaplastic species.
+According to the experimental data from the NREL 2FBR, the char yield for the Residues feedstock is around 15 wt. \% compared to the batch reactor model's 27 wt. \% total solids yield. A majority of the solids yield from the batch reactor model is due to the metaplastic species. To increase the metaplastic reaction rates, temperature $T$ was added to the prefactors. For example, the original prefactor for reaction 23 in Table \ref{tab:chem-kinetics} is $5 \times 10^{12}$ while the modified prefactor is $5 \times T \times 10^{12}$. The effects of this modification can be seen in Figure \ref{fig:metaplastic} where the metaplastic yield for the Residues feedstock is considerably less than the yield from the original reaction rates. Total solids yield using the modified reaction rates is approximately 18 wt. \% compared to 27 wt. \% using the original reaction rates. The remaining reactor models presented in this report use the modified metaplastic reaction rates since the total solids yield more closely resembles the NREL 2FBR char yield.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.49\textwidth]{figures/metaplastic1.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/metaplastic2.pdf}
+    \caption{Metaplastic yields for the Residues feedstock using the original (left) and modified (right) reaction rates in a batch reactor model.}
+    \label{fig:metaplastic}
+\end{figure}
 
 \subsection{CSTR model}
 
