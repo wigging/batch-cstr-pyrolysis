@@ -23,28 +23,27 @@ energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_meta.cti'    # Cantera input file
 
 # Select a chemical species used to predict final yield
-# make sure `y_chemical[i]` is modified appropriately, see below
-# make sure `ax.set_xlabel()` is modified appropriately, see below
+# make sure `y_chemical[i]` is modified for Acetic acid species, see below
 
-# phenol is C6H5OH
+# label = 'Phenol'
 # chemical = 'C6H5OH'
 
-# furfural is FURFURAL
+# label = 'Furfural'
 # chemical = 'FURFURAL'
 
-# formaldehyde is CH2O
+# label = 'Formaldehyde'
 # chemical = 'CH2O'
 
-# propionaldehyde is C2H5CHO
+# label = 'Propionaldehyde'
 # chemical = 'C2H5CHO'
 
-# heavy molecular weight lignin is C24H28O4
+# label = 'Heavy molecular weight lignin'
 # chemical = 'C24H28O4'
 
-# acetaldehyde is CH3CHO
+label = 'Acetaldehyde'
 chemical = 'CH3CHO'
 
-# acetic acid is CH2OHCHO and CH3CO2H
+# label = 'Acetic acid'
 # chemical = ('CH2OHCHO', 'CH3CO2H')
 
 # Feedstocks
@@ -91,7 +90,7 @@ y = np.arange(n)
 
 _, ax = plt.subplots(tight_layout=True)
 ax.barh(y, y_chemical)
-ax.set_xlabel('Acetaldehyde, mass fraction [-]')
+ax.set_xlabel(f'{label}, mass fraction [-]')
 ax.set_yticks(y)
 ax.set_yticklabels(names)
 ax.invert_yaxis()
