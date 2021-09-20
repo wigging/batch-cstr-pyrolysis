@@ -495,7 +495,7 @@ To compare the experimental yields to the reactor model results, the measured pr
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/batch-exp1.pdf}
-    \caption{Comparison of the experimental and batch reactor model yields. For each feedstock, model yields are the top bar and experimental yields are the bottom bar.}
+    \caption{Comparison of the experimental yields and the batch reactor model results. For each feedstock, model results are the top bar and experimental yields are the bottom bar.}
     \label{fig:batch-exp1}
 \end{figure}
 
@@ -506,6 +506,29 @@ A comparison of the lumped yields to ash content in the feedstocks is shown in F
     \includegraphics[width=0.5\textwidth]{figures/batch-exp2.pdf}
     \caption{Comparison of the experimental and batch reactor model yields to feedstock ash content.}
     \label{fig:batch-exp2}
+\end{figure}
+
+The Debiagi et al. kinetics scheme makes it possible to predict individual components of the pyrolysis products. Yields for several chemical species generated from each feedstock using the batch reactor model are given in Figure \ref{fig:batch-chemicals}. The stem wood produced the largest mass fraction of acetaldehyde, acetic acid, and furfural. The bark plus needles feedstock generated the highest yield of formaldehyde. Needles produced the highest mass fraction for the heavy molecular weight lignin. Bark generated the largest yield of phenol and did not produce any noticeable amount of the heavy lignin.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.49\textwidth]{figures/batch-acetaldehyde.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/batch-acetic.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/batch-formaldehyde.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/batch-heavylignin.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/batch-furfural.pdf}
+    \includegraphics[width=0.49\textwidth]{figures/batch-phenol.pdf}
+    \caption{Chemical species yields from the batch reactor model.}
+    \label{fig:batch-chemicals}
+\end{figure}
+
+The effects of reactor temperature on product yields are shown in Figure \ref{fig:batch-temps}. Increasing the reaction temperature above 773.15 K (500$^\circ$C) improves the rate of conversion; consequently, a higher reactor temperature should be used if the feedstock residence time is less than 5 to 10 seconds. At temperatures less than 773.15 K, a feedstock residence time greater than 10 seconds may be needed for full devolatilization of the biomass. It should be noted that the Debiagi et al. kinetics does not account for secondary reactions of the pyrolysis products. Therefore, the batch reactor model does not currently capture the effects of long residence times.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/batch-temps.pdf}
+    \caption{Batch reactor model yields at different reaction temperatures. Dashed line represents the NREL 2FBR temperature.}
+    \label{fig:batch-temps}
 \end{figure}
 
 \subsection{CSTR model}
