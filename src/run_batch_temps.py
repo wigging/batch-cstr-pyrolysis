@@ -79,41 +79,50 @@ for i in range(ntemps):
     yt_solid[i] = states(*sp_solids).Y.sum(axis=1)
     yt_metaplastic[i] = states(*sp_metaplastics).Y.sum(axis=1)
 
+# Print
+# ----------------------------------------------------------------------------
+
+print(
+    f'\n{" Batch reactor model ":*^70}\n'
+    '\nParameters for reactor model\n'
+    f'feedstock     {feedstock.name + ", Cycle " + str(feedstock.cycle)}\n'
+    f'final time    {time[-1]} s\n'
+    f'temperature   {temp} K\n'
+    f'pressure      {p:,} Pa\n'
+    f'energy        {energy}\n'
+    f'cti file      {cti}'
+)
+
 # Plot
 # ----------------------------------------------------------------------------
 
 
-def style(ax, xlabel, ylabel, loc):
+def style(ax, xlabel, ylabel, loc=None, title=None):
     ax.grid(color='0.9')
     ax.set_frame_on(False)
     ax.tick_params(color='0.9')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.legend(loc=loc)
+    if loc:
+        ax.legend(loc=loc)
+    if title:
+        ax.set_title(title)
 
 
-_, ax = plt.subplots(tight_layout=True)
+_, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 4.8), sharey=True, tight_layout=True)
+
 for i in range(ntemps):
     if temps[i] == 773.15:
-        ax.plot(time, yt_gas[i], 'k--', label=f'{temps[i]} K')
+        ax1.plot(time, yt_gas[i], 'k--')
+        ax2.plot(time, yt_liquid[i], 'k--')
+        ax3.plot(time, yt_solid[i] + yt_metaplastic[i], 'k--', label=f'{temps[i]} K')
     else:
-        ax.plot(time, yt_gas[i], label=f'{temps[i]} K')
-style(ax, 'Time [s]', 'Gas mass fraction [-]', loc='best')
+        ax1.plot(time, yt_gas[i])
+        ax2.plot(time, yt_liquid[i])
+        ax3.plot(time, yt_solid[i] + yt_metaplastic[i], label=f'{temps[i]} K')
 
-_, ax = plt.subplots(tight_layout=True)
-for i in range(ntemps):
-    if temps[i] == 773.15:
-        ax.plot(time, yt_liquid[i], 'k--', label=f'{temps[i]} K')
-    else:
-        ax.plot(time, yt_liquid[i], label=f'{temps[i]} K')
-style(ax, 'Time [s]', 'Liquid mass fraction [-]', loc='best')
-
-_, ax = plt.subplots(tight_layout=True)
-for i in range(ntemps):
-    if temps[i] == 773.15:
-        ax.plot(time, yt_solid[i], 'k--', label=f'{temps[i]} K')
-    else:
-        ax.plot(time, yt_solid[i], label=f'{temps[i]} K')
-style(ax, 'Time [s]', 'Solid mass fraction [-]', loc='best')
+style(ax1, 'Time [s]', 'Mass fraction [-]', title='Gases')
+style(ax2, 'Time [s]', '', title='Liquids')
+style(ax3, 'Time [s]', '', loc='best', title='Solids')
 
 plt.show()
