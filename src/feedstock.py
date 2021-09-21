@@ -85,6 +85,8 @@ class Feedstock:
     normlump_yield : ndarray
         Normalized lumped yields from normalized experiment yield data. Values
         are [gases, liquids, solids] in units of weight percent (wt. %).
+    residence_time : optional float
+        Residence of the feedstock in the reactor [s].
     """
 
     def __init__(self, data):
@@ -108,6 +110,10 @@ class Feedstock:
         self.lump_yield = None
         self.lump2_yield = None
         self.normlump_yield = None
+
+        # Assign residence time if it is available
+        if 'residenceTime' in data:
+            self.residence_time = data['residenceTime']
 
         # Calculate proximate and ultimate analysis bases
         self._prox_bases()
