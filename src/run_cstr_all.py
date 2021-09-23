@@ -42,8 +42,7 @@ ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
 n_cstrs = 1000                      # number of CSTRs in series
-tau = 20 / n_cstrs                  # residence time [s]
-energy = 'off'                      # reactor energy
+energy = 'on'                      # reactor energy
 cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 
 # Feedstocks
@@ -52,7 +51,8 @@ cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 with open("data/feedstocks.json") as json_file:
     fdata = json.load(json_file)
 
-feedstocks = [Feedstock(fd) for fd in fdata]
+# only use feedstocks with residence time value
+feedstocks = [Feedstock(fd) for fd in fdata if 'residenceTime' in fd]
 
 # Reactor inputs
 # ----------------------------------------------------------------------------
@@ -99,6 +99,9 @@ exp_ash = np.zeros(nf)
 # Run CSTR reactor model for each feedstock
 for i, feedstock in enumerate(feedstocks):
     print('Run', i, feedstock.name)
+
+    # Get residence time for each CSTR
+    tau = feedstock.residence_time / n_cstrs
 
     # Calculate optimized biomass composition (daf) and splitting parameters
     bc, splits = feedstock.calc_biocomp()
@@ -164,7 +167,6 @@ print(
     f'length     {length} m\n'
     f'temp       {temp} K\n'
     f'p          {p:,} Pa\n'
-    f'tau        {tau} s\n'
     f'n_cstrs    {n_cstrs}\n'
     f'energy     {energy}\n'
     f'cti file   {cti}'
@@ -189,10 +191,10 @@ b1 = ax.barh(y, yf_gases * 100, color='C6', label='Gases')
 b2 = ax.barh(y, yf_liquids * 100, left=yf_gases * 100, color='C4', label='Liquids')
 b3 = ax.barh(y, yf_solids * 100, left=(yf_gases + yf_liquids) * 100, color='C2', label='Solids')
 b4 = ax.barh(y, yf_metas * 100, left=(yf_gases + yf_liquids + yf_solids) * 100, color='C1', label='Metaplastics')
-ax.bar_label(b1, label_type='center', fmt='%.1f')
-ax.bar_label(b2, label_type='center', fmt='%.1f')
-ax.bar_label(b3, label_type='center', fmt='%.1f')
-ax.bar_label(b4, label_type='center', fmt='%.1f')
+ax.bar_label(b1, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(b2, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(b3, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(b4, color='w', label_type='center', fmt='%.1f')
 ax.legend(bbox_to_anchor=[0.5, 1.02], loc='center', ncol=4, frameon=False)
 ax.set_yticks(y)
 ax.set_yticklabels(names)
@@ -208,7 +210,7 @@ yf_solids = yf_solids * 100
 yf_metas = yf_metas * 100
 yf_solidmeta = yf_solids + yf_metas
 
-_, ax = plt.subplots(tight_layout=True, figsize=(9, 8))
+_, ax = plt.subplots(tight_layout=True, figsize=(9, 4.8))
 
 b1 = ax.barh(y, yf_gases, edgecolor='k', height=h, color='C6', label='Gases')
 b2 = ax.barh(y, yf_liquids, edgecolor='k', left=yf_gases, height=h, color='C4', label='Liquids')
@@ -218,12 +220,12 @@ e1 = ax.barh(y + h, exp_gases, edgecolor='k', height=h, color='C6')
 e2 = ax.barh(y + h, exp_liquids, edgecolor='k', height=h, left=exp_gases, color='C4')
 e3 = ax.barh(y + h, exp_solids, edgecolor='k', height=h, left=exp_gases + exp_liquids, color='C2')
 
-ax.bar_label(b1, label_type='center', fmt='%.1f')
-ax.bar_label(e1, label_type='center', fmt='%.1f')
-ax.bar_label(b2, label_type='center', fmt='%.1f')
-ax.bar_label(e2, label_type='center', fmt='%.1f')
-ax.bar_label(b3, label_type='center', fmt='%.1f')
-ax.bar_label(e3, label_type='center', fmt='%.1f')
+ax.bar_label(b1, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(e1, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(b2, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(e2, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(b3, color='w', label_type='center', fmt='%.1f')
+ax.bar_label(e3, color='w', label_type='center', fmt='%.1f')
 
 ax.legend(bbox_to_anchor=[0.5, 1.02], loc='center', ncol=3, frameon=False)
 ax.set_yticks(y + h / 2)
