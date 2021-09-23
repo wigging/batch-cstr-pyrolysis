@@ -42,7 +42,7 @@ ghr_bio = 420    # biomass inlet feedrate [g/hr]
 slm_n2 = 14      # inlet nitrogen gas flowrate [SLM]
 
 n_cstrs = 1000                      # number of CSTRs in series
-energy = 'on'                      # reactor energy
+energy = 'off'                      # reactor energy
 cti = 'data/debiagi_sw_metan2.cti'  # Cantera input file
 
 # Feedstocks
