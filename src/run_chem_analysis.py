@@ -100,7 +100,7 @@ _, ax = plt.subplots(tight_layout=True)
 
 for c in chems_d:
     ax.plot(c, 'o')
-ax.set_ylabel('Weight % (as-determined)')
+ax.set_ylabel('Weight % (dry basis)')
 ax.set_xlabel('Chemical analysis')
 ax.set_xticks(range(len(labels)))
 ax.set_xticklabels(labels)

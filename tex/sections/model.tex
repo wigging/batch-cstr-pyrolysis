@@ -247,17 +247,17 @@ A batch reactor was modeled to understand the time scales associated with the bi
     \label{fig:reactor-batch}
 \end{figure}
 
-To account for inlet and outlet flows, a continuous stirred tank reactor (CSTR) system at steady-state conditions was also modeled. The material balance for a steady-state CSTR does not account for accumulation but does consider the residence time in the system
+To account for inlet and outlet flows, residence time, and reactor geometry, a continuous stirred tank reactor (CSTR) system at steady-state conditions is also modeled. The material balance for a steady-state CSTR does not account for accumulation but does consider the residence time in the system
 
 \begin{equation}
     \begin{aligned}
         0 &= input - output + reaction \\
         0 &= v C_{A0} - v C_A + r_A V \\
-        C_A &= C_{A0} + r_A\;\tau
+        C_A &= C_{A0} + r_A\;\tau \\
     \end{aligned}
 \end{equation}
 
-\noindent where $\tau$ is the residence time (s) of chemical $A$ in the reactor. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}. The Cantera Python package was used to model the CSTR using an IdealGasReactor with inlet and outlet flows \cite{Cantera-2018}.
+\noindent where $\tau$ is the residence time (s) of chemical $A$ in the reactor. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}. The Cantera Python package is used to model the CSTR using an IdealGasReactor object with inlet and outlet flows \cite{Cantera-2018}.
 
 \begin{figure}[H]
     \centering
@@ -266,7 +266,13 @@ To account for inlet and outlet flows, a continuous stirred tank reactor (CSTR) 
     \label{fig:reactor-cstr}
 \end{figure}
 
-A series of continuous stirred-tank reactor (CSTR) models were used to model the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor. The residence time for each feedstock was obtained from CFD simulations performed by NETL. As the number of CSTRs increases, the reactor model behaves more like a plug flow reactor (PFR). The modeling technique is illustrated by Figure \ref{fig:reactor-cstr-series} where the $N$ subscript represents the total number of CSTRs.
+A series of continuous stirred-tank reactor (CSTR) models were used to model the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor. The average residence time for each feedstock is obtained from CFD simulations performed by NETL. As the number of CSTRs increases, the reactor model behaves more like a plug flow reactor (PFR). This modeling technique is illustrated by Figure \ref{fig:reactor-cstr-series} where the subscript $n$ represents the total number of CSTRs. The residence time $\tau$ in each CSTR is calculated as
+
+\begin{equation}
+    \tau = \frac{\tau_{avg}}{n}
+\end{equation}
+
+\noindent where $\tau_{avg}$ is the average residence time from CFD simulations and $n$ is the total number of CSTRs in series.
 
 \begin{figure}[H]
     \centering
@@ -281,4 +287,4 @@ To exclude the nitrogen gas fraction from the calculated CSTR product yields, th
     Y_{i,\,N_2\,free} = \frac{Y_{i,\,N_2}}{Y_{gas,\,N_2} + Y_{liquid,\,N_2} + Y_{solid,\,N_2} + Y_{metaplastic,\,N_2} - Y_{N_2}}
 \end{equation}
 
-\noindent where $Y$ is the mass fraction, and $i$ represents the gas, liquid, solid, and metaplastic phases.
+\noindent where $Y$ is the mass fraction and the subscript $i$ represents the gas, liquid, solid, and metaplastic phases.
