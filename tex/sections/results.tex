@@ -533,6 +533,15 @@ The effects of reactor temperature on product yields from the Residues feedstock
 
 \subsection{CSTR model}
 
+The conversion profiles associated with the modified Debiagi kinetics using a series of CSTR models for the Residues feedstock are shown in Figure \ref{fig:cstr-products}. The results represent a series of 1,000 CSTRs with a total residence time of 20 seconds, a constant reaction temperature of 773.15 K, and a pressure of 101,325 Pa.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/cstr-products.pdf}
+    \caption{Generation of the pyrolysis products for the Residues feedstock using a series CSTR model with the modifed Debiagi et al. kinetics.}
+    \label{fig:cstr-products}
+\end{figure}
+
 The average residence times for six feedstocks in the reactor are given in Table \ref{tab:residence}. The residence times are obtained from CFD simulations of the NREL 2FBR system. According to the simulations, bark has the longest residence time in the reactor while the stem wood has the shortest residence time. The differences in residence times are likely due to the different particle size, density, and shape characteristics of each feedstock.
 
 \begin{table}[H]
@@ -553,7 +562,7 @@ The average residence times for six feedstocks in the reactor are given in Table
     \end{tabular}
 \end{table}
 
-The CSTR model uses the average residence time $\tau_{avg}$ of each feedstock to determine the residence time $\tau$ in each stage. Figure \ref{fig:cstr-exp} compares the series CSTR model results to the experimental yields. The CSTR model is capable of predicting the lumped gases, liquids, and solids yields within 10\% of the experimental data.
+The series CSTR model uses the average residence time $\tau_{avg}$ of each feedstock to determine the residence time $\tau$ in each stage. Figure \ref{fig:cstr-exp} compares the series CSTR model results to the experimental yields. The CSTR model is capable of predicting the lumped gases, liquids, and solids yields within 10\% of the experimental data.
 
 \begin{figure}[H]
     \centering

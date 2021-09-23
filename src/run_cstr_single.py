@@ -208,4 +208,12 @@ _config(ax2, xlabel='CSTR [-]', ylabel='Temperature [K]')
 ax3.plot(states.P / 1000)
 _config(ax3, xlabel='CSTR [-]', ylabel='Pressure [kPa]')
 
+# Yield profiles for N₂ free basis
+_, ax = plt.subplots(tight_layout=True)
+ax.plot(y_gas, label='gas')
+ax.plot(y_liquid, label='liquid')
+ax.plot(y_solid, label='solid')
+ax.plot(y_metaplastic, label='metaplastic')
+_config(ax, xlabel='CSTR [-]', ylabel='Mass fraction (N₂ free basis) [-]', legend='best')
+
 plt.show()
