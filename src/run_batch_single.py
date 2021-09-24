@@ -140,6 +140,7 @@ def style(ax, xlabel, ylabel, loc=None):
     ax.set_ylabel(ylabel)
     if loc:
         ax.legend(loc=loc)
+    # plt.rcParams.update({'font.size': 13, 'lines.linewidth': 2})
 
 
 # ---
@@ -190,7 +191,7 @@ ax.plot(states.t, y_gas, label='gas')
 ax.plot(states.t, y_liquid, label='liquid')
 ax.plot(states.t, y_solid, label='solid')
 ax.plot(states.t, y_metaplastic, label='metaplastic')
-style(ax, xlabel='Time [s]', ylabel='Mixture mass fraction [-]', loc='best')
+style(ax, xlabel='Time [s]', ylabel='Mass fraction [-]', loc='best')
 
 # ---
 
