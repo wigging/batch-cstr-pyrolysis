@@ -228,7 +228,7 @@ The material balance for a chemical reactor considers the inlet and outlet flows
 
 \noindent where $A$ is the pre-exponential factor, $T$ is the reaction temperature, $b$ is the temperature exponent, $E$ is the activation energy, and $R$ is the universal gas constant.
 
-A batch reactor was modeled to understand the time scales associated with the biomass pyrolysis kinetics. For a batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out resulting in the following material balance for a batch reactor model
+A batch reactor is modeled to understand the time scales associated with the biomass pyrolysis kinetics. For a batch reactor, input and output is zero therefore only the accumulation and reaction terms remain in the material balance. For a constant volume reactor the $V$ terms cancel out resulting in the following material balance for a batch reactor model
 
 \begin{equation}
     \label{eq:batch-balance}
@@ -238,13 +238,15 @@ A batch reactor was modeled to understand the time scales associated with the bi
     \end{aligned}
 \end{equation}
 
-\noindent A depiction of a batch reactor can be seen in Figure \ref{fig:reactor-batch}. The Cantera Python package was used to model the batch reactor as an IdealGasReactor \cite{Cantera-2018}.
+\noindent A depiction of a batch reactor is shown in Figure \ref{fig:batch-cstr}. The Cantera Python package is used to model the batch reactor as an IdealGasReactor object \cite{Cantera-2018}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.2\textwidth]{figures/reactor-batch.png}
-    \caption{Representation of a batch reactor system. Source: Wikipedia.}
-    \label{fig:reactor-batch}
+    \hspace{0.1\textwidth}
+    \includegraphics[width=0.265\textwidth]{figures/reactor-cstr.png}
+    \caption{Representation of a batch reactor (left) and a continuous stirred-tank reactor (right). Source: Wikipedia.}
+    \label{fig:batch-cstr}
 \end{figure}
 
 To account for inlet and outlet flows, residence time, and reactor geometry, a continuous stirred tank reactor (CSTR) system at steady-state conditions is also modeled. The material balance for a steady-state CSTR does not account for accumulation but does consider the residence time in the system
@@ -257,16 +259,9 @@ To account for inlet and outlet flows, residence time, and reactor geometry, a c
     \end{aligned}
 \end{equation}
 
-\noindent where $\tau$ is the residence time (s) of chemical $A$ in the reactor. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:reactor-cstr}. The Cantera Python package is used to model the CSTR using an IdealGasReactor object with inlet and outlet flows \cite{Cantera-2018}.
+\noindent where $\tau$ is the residence time (s) of chemical $A$ in the reactor. A depiction of a CSTR system with its inlet and outlet flows is shown in Figure \ref{fig:batch-cstr}. The Cantera Python package is used to model the CSTR using an IdealGasReactor object with inlet and outlet flows \cite{Cantera-2018}.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.25\textwidth]{figures/reactor-cstr.png}
-    \caption{Representation of a continuous stirred-tank reactor (CSTR) system with inlet and outlet flows. Source: Wikipedia.}
-    \label{fig:reactor-cstr}
-\end{figure}
-
-A series of continuous stirred-tank reactor (CSTR) models were used to model the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor. The average residence time for each feedstock is obtained from CFD simulations performed by NETL. As the number of CSTRs increases, the reactor model behaves more like a plug flow reactor (PFR). This modeling technique is illustrated by Figure \ref{fig:reactor-cstr-series} where the subscript $n$ represents the total number of CSTRs. The residence time $\tau$ in each CSTR is calculated as
+A series of CSTRs are modeled to represent the mixing (residence time) of the different feedstocks in the NREL fluidized bed reactor. The average residence time for each feedstock is obtained from CFD simulations performed by NETL. As the number of CSTRs increases, the reactor model behaves more like a plug flow reactor (PFR). This modeling technique is illustrated by Figure \ref{fig:reactor-cstr-series} where the subscript $n$ represents the total number of CSTRs. The residence time $\tau$ in each CSTR is calculated as
 
 \begin{equation}
     \tau = \frac{\tau_{avg}}{n}
