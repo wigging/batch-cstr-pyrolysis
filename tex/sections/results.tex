@@ -8,7 +8,8 @@ Feedstock characterization, batch reactor model results, and the series CSTR mod
 
 Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as-determined (AD), as-received (AR), dry (D), dry ash-free (DAF), and CHO basis. The reported H and O for the ultimate analysis data does not include the H and O in the moisture; therefore, the total value for the as-determined basis (AD column) excludes the moisture percentage.
 
-\newpage
+\begin{center}
+\footnotesize
 \begin{longtable}{lrrrrr}
     \caption{Proximate and ultimate analysis basis values for each feedstock given as wt. \%. Reported H and O values for ultimate analysis AD basis excludes H and O in moisture.}
     \label{tab:basis} \\
@@ -228,6 +229,7 @@ Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as
     moisture & (2.75) & 24.14  & --     & --     & -- \\
     total    & 100.01 & 100.01 & 100.01 & 100.01 & 100.01 \\
 \end{longtable}
+\end{center}
 
 Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} and \ref{tab:chemical-2}, the dry ash-free basis (DAF) values are calculated using Equation \ref{eq:chem-daf}. The DAF values are shown in Tables \ref{tab:chemical-values-1} and \ref{tab:chemical-values-2}. These values represent the measured cellulose, hemicellulose, and lignin fractions used in the optimization procedure for the biomass composition.
 
@@ -563,11 +565,20 @@ The average residence times for six feedstocks in the reactor are given in Table
     \end{tabular}
 \end{table}
 
-The series CSTR model uses the average residence time $\tau_{avg}$ of each feedstock to determine the residence time $\tau$ in each stage. Figure \ref{fig:cstr-exp} compares the series CSTR model results to the experimental yields. The CSTR model is capable of predicting the lumped gases, liquids, and solids yields within 10\% of the experimental data.
+The series CSTR model uses the average residence time $\tau_{avg}$ of each feedstock to determine the residence time $\tau$ in each stage. Figure \ref{fig:cstr-exp1} compares the series CSTR model results to the experimental yields. The CSTR model is capable of predicting the lumped gases, liquids, and solids yields within 10\% of the experimental data. Again, the mass closure in the experimental data introduces some uncertainty when comparing to the results of the series CSTR model.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/cstr-exp.pdf}
+    \includegraphics[width=\textwidth]{figures/cstr-exp1.pdf}
     \caption{Comparison of the series CSTR model results to the experimental yields. For each feedstock, model results are given by the top bar while experimental yields are on the bottom bar.}
-    \label{fig:cstr-exp}
+    \label{fig:cstr-exp1}
+\end{figure}
+
+Using results from the series CSTR model, a comparison of the lumped yields to ash content in the feedstocks is shown in Figure \ref{fig:cstr-exp2}. More data points from the CSTR model are needed to make better trend predictions. However, the results do suggest a decrease in liquids yield with an increase in feedstock ash content. A similar trend is observed with the batch reactor model as shown previously in Figure \ref{fig:batch-exp2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/cstr-exp2.pdf}
+    \caption{Comparison of the experimental yields and series CSTR model results to feedstock ash content.}
+    \label{fig:cstr-exp2}
 \end{figure}
