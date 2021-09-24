@@ -6,13 +6,13 @@ This section presents the equations used to convert the measured data to differe
 
 \subsection{Basis of analysis}
 
-The proximate analysis data was converted to different bases using ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the as-determined (ad) basis to as-received (ar), dry (d), and dry ash-free (daf) bases where $X$ is the wt. \% of the corresponding basis value, $M$ is the moisture content, and $ADL$ is the air-dry loss assumed to be 22 wt. \%. As an example, to obtain the as-received value of the fixed carbon use $FC_{ar} = FC_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}}$.
+The proximate analysis data was converted to different bases using ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the as-determined (AD) basis to as-received (AR), dry (D), and dry ash-free (DAF) bases where $P$ is the wt. \% of the corresponding basis parameter, $M$ is the moisture content, and $ADL$ is the air-dry loss assumed to be 22 wt. \%. As an example, to obtain the as-received value of the fixed carbon use $FC_{ar} = FC_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}}$.
 
 \begin{align}
     M_{ar} &= \left(M_{ad} \times \frac{100 - ADL}{100}\right) + ADL \label{eq:prox-bases1} \\
-    X_{ar} &= X_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}} \\
-    X_{d} &= X_{ad} \times \frac{100}{100 - M_{ad}} \\
-    X_{daf} &= X_{ad} \times \frac{100}{100 - M_{ad} - ash_{ad}} \label{eq:prox-bases4}
+    P_{ar} &= P_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}} \\
+    P_{d} &= P_{ad} \times \frac{100}{100 - M_{ad}} \\
+    P_{daf} &= P_{ad} \times \frac{100}{100 - M_{ad} - ash_{ad}} \label{eq:prox-bases4}
 \end{align}
 
 Similarly, the ultimate analysis data was also converted to different bases using the ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the carbon, nitrogen, and sulfur fractions to different bases while Equations \ref{eq:ult-bases1}--\ref{eq:ult-bases4} are for the hydrogen and oxygen fractions. Equation \ref{eq:cho-basis} calculates the CHO basis from the dry ash-free basis.
@@ -22,7 +22,7 @@ Similarly, the ultimate analysis data was also converted to different bases usin
     O_{ar} &= (O_{ad} - 0.8881\, M_{ad}) \times \frac{100 - M_{ar}}{100 - M_{ad}} \\
     H_{d} &= (H_{ad} - 0.1119\, M_{ad}) \times \frac{100}{100 - M_{ad}} \\
     O_{d} &= (O_{ad} - 0.8881\, M_{ad}) \times \frac{100}{100 - M_{ad}} \label{eq:ult-bases4} \\
-    X_{cho} &= X_{daf} \times \frac{100}{100 - N_{daf} - S_{daf}} \label{eq:cho-basis}
+    P_{cho} &= P_{daf} \times \frac{100}{100 - N_{daf} - S_{daf}} \label{eq:cho-basis}
 \end{align}
 
 For the chemical analysis data, the given dry basis values $P_d$ are converted to a dry ash-free basis $P_{daf}$ using Equation \ref{eq:chem-daf} where $P_{struct}$ is the structural inorganics, $P_{nonstruct}$ is the non-structural inorganics, and $P_{d,\,total}$ is the sum of the dry basis values.
