@@ -6,7 +6,7 @@ Feedstock characterization, batch reactor model results, and the series CSTR mod
 
 \subsection{Feedstock characterization}
 
-Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as-determined (AD), as-received (AR), dry (D), dry ash-free (DAF), and CHO basis. The reported H and O for the ultimate analysis data does not include the H and O in the moisture; therefore, the total value for the as-determined basis (AD column) excludes the moisture percentage.
+Table \ref{tab:basis} presents the proximate and ultimate analysis data on an as-determined (AD), as-received (AR), dry (D), dry ash-free (DAF), and CHO basis. The reported H and O for the ultimate analysis data does not include the H and O in the moisture; therefore, the total value for the as-determined basis (AD column) excludes the moisture percentage. The carbon and hydrogen from the CHO basis are used to determine the biomass composition.
 
 \begin{center}
 \footnotesize
@@ -483,7 +483,7 @@ To understand the time-scale and conversion profiles associated with the Debiagi
     \label{fig:batch-products}
 \end{figure}
 
-According to the experimental data from the NREL 2FBR, the char yield for the Residues feedstock is around 15 wt. \% compared to the batch reactor model's 27 wt. \% total solids yield. A majority of the solids yield from the batch reactor model is due to the metaplastic species (see left plot in Figure \ref{fig:batch-products}). To increase the metaplastic reaction rates, temperature $T$ was added to the prefactors. For example, the original prefactor for reaction 23 in Table \ref{tab:chem-kinetics} is $5 \times 10^{12}$ while the modified prefactor is $5 \times T \times 10^{12}$. The effects of this modification can be seen in Figures \ref{fig:batch-products} and \ref{fig:metaplastic} where the metaplastic yield for the Residues feedstock is considerably less than the yield from the original reaction rates. Total solids yield using the modified reaction rates is approximately 18 wt. \% compared to 27 wt. \% using the original reaction rates. The remaining reactor models presented in this report use the modified metaplastic reaction rates since the total solids yield more closely resembles the NREL 2FBR char yield.
+According to the experimental data from the NREL 2FBR, the char yield for the Residues feedstock is around 15 wt. \% compared to the batch reactor model's 27 wt. \% total solids yield. A majority of the solids yield from the batch reactor model is due to the metaplastic species (see left plot in Figure \ref{fig:batch-products}). To increase the metaplastic reaction rates, temperature $T$ is added to the prefactors. For example, the original prefactor for reaction 23 in Table \ref{tab:chem-kinetics} is $5 \times 10^{12}$ while the modified prefactor is $5 \times T \times 10^{12}$. The effects of this modification can be seen in Figures \ref{fig:batch-products} and \ref{fig:metaplastic} where the metaplastic yield for the Residues feedstock is considerably less than the yield from the original reaction rates. Total solids yield using the modified reaction rates is approximately 18 wt. \% compared to 27 wt. \% using the original reaction rates. The remaining reactor models presented in this report use the modified metaplastic reaction rates since the total solids yield more closely resembles the NREL 2FBR char yield.
 
 \begin{figure}[H]
     \centering
@@ -493,7 +493,7 @@ According to the experimental data from the NREL 2FBR, the char yield for the Re
     \label{fig:metaplastic}
 \end{figure}
 
-To compare the experimental yields to the reactor model results, the measured products from the NREL 2FBR are lumped into gases, liquids, and solids. Gases represent the light gas, condensables, and water vapor products. Liquids are the oil yield and solids are the char yield. Solids from the model are represented by the solid and metaplastic species. Figure \ref{fig:batch-exp1} compares the yields from the NREL 2FBR fluidized bed reactor to the batch reactor model. The batch reactor model results are within 10\% of the experimental yields.
+To compare the experimental yields to the reactor model results, the measured products from the NREL 2FBR are lumped into gases, liquids, and solids. Gases represent the light gas, condensables, and water vapor products. Liquids are the oil yield and solids are the char yield. Solids from the model are represented by the solid and metaplastic species. Figure \ref{fig:batch-exp1} compares the yields from the NREL 2FBR fluidized bed reactor to the batch reactor model. The batch reactor model results are within 10\% of the experimental yields. However, due to the inconsistent mass closures for the experimental data, there is some uncertainty in comparing the batch reactor model results to the measured values.
 
 \begin{figure}[H]
     \centering
@@ -545,7 +545,7 @@ The conversion profiles associated with the modified Debiagi kinetics using a se
     \label{fig:cstr-products}
 \end{figure}
 
-The average residence times for six feedstocks in the reactor are given in Table \ref{tab:residence}. The residence times are obtained from CFD simulations of the NREL 2FBR system. According to the simulations, bark has the longest residence time in the reactor while the stem wood has the shortest residence time. The differences in residence times are likely due to the different particle size, density, and shape characteristics of each feedstock.
+The average residence times for six feedstocks in the NREL reactor are given in Table \ref{tab:residence}. The residence times are obtained from CFD simulations of the NREL 2FBR system. According to the simulations, bark has the longest residence time in the reactor while the stem wood has the shortest residence time. The differences in residence times are likely due to the different particle size, density, and shape characteristics of each feedstock.
 
 \begin{table}[H]
     \caption{Average residence time from CFD simulations of each feedstock in the NREL 2FBR. Values are given in seconds.}

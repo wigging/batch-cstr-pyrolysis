@@ -6,7 +6,7 @@ This section presents the equations used to convert the measured data to differe
 
 \subsection{Basis of analysis}
 
-The proximate analysis data was converted to different bases using ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the as-determined (AD) basis to as-received (AR), dry (D), and dry ash-free (DAF) bases where $P$ is the wt. \% of the corresponding basis parameter, $M$ is the moisture content, and $ADL$ is the air-dry loss assumed to be 22 wt. \%. As an example, to obtain the as-received value of the fixed carbon use $FC_{ar} = FC_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}}$.
+The proximate analysis data is converted to different bases using ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the as-determined (AD) basis to as-received (AR), dry (D), and dry ash-free (DAF) bases where $P$ is the wt. \% of the corresponding basis parameter, $M$ is the moisture content, and $ADL$ is the air-dry loss assumed to be 22 wt. \%. As an example, to obtain the as-received value of the fixed carbon use $FC_{ar} = FC_{ad} \times \frac{100 - M_{ar}}{100 - M_{ad}}$.
 
 \begin{align}
     M_{ar} &= \left(M_{ad} \times \frac{100 - ADL}{100}\right) + ADL \label{eq:prox-bases1} \\
@@ -15,7 +15,7 @@ The proximate analysis data was converted to different bases using ASTM methods 
     P_{daf} &= P_{ad} \times \frac{100}{100 - M_{ad} - ash_{ad}} \label{eq:prox-bases4}
 \end{align}
 
-Similarly, the ultimate analysis data was also converted to different bases using the ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the carbon, nitrogen, and sulfur fractions to different bases while Equations \ref{eq:ult-bases1}--\ref{eq:ult-bases4} are for the hydrogen and oxygen fractions. Equation \ref{eq:cho-basis} calculates the CHO basis from the dry ash-free basis.
+Similarly, the ultimate analysis data is also converted to different bases using the ASTM methods \cite{Astm-2015}. Equations \ref{eq:prox-bases1}--\ref{eq:prox-bases4} convert the carbon, nitrogen, and sulfur fractions to different bases while Equations \ref{eq:ult-bases1}--\ref{eq:ult-bases4} are for the hydrogen and oxygen fractions. Equation \ref{eq:cho-basis} calculates the CHO basis from the dry ash-free basis.
 
 \begin{align}
     H_{ar} &= (H_{ad} - 0.1119\, M_{ad}) \times \frac{100 - M_{ar}}{100 - M_{ad}} \label{eq:ult-bases1} \\
@@ -34,7 +34,7 @@ For the chemical analysis data, the given dry basis values $P_d$ are converted t
 
 \subsection{Biomass pyrolysis kinetics}
 
-The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite{Debiagi-2018} were used to model biomass pyrolysis in the fluidized bed reactor. Table \ref{tab:chem-kinetics} summarizes the reactions along with the associated prefactors and activation energies. A description of the chemical species in the Debiagi et al. kinetic scheme is provided in Table \ref{tab:chem-species}.
+The kinetic reaction mechanisms presented in the Debiagi et al. 2018 paper \cite{Debiagi-2018} are used to model biomass pyrolysis in the fluidized bed reactor. Table \ref{tab:chem-kinetics} summarizes the reactions along with the associated prefactors and activation energies. A description of the chemical species in the Debiagi et al. kinetic scheme is provided in Table \ref{tab:chem-species}.
 
 % \setlength\LTleft{-0.2in}
 % \setlength\LTright{-0.2in}
@@ -191,7 +191,7 @@ According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical com
     \end{tabular}
 \end{table}
 
-As discussed previously, the largest differences in the chemical analysis feedstock data are for the lignin, glucan, and mannan fractions. These fractions represent the cellulose (glucan), hemicellulose (xylan, galactan, arabinan, mannan, acetyl), and total lignin components of the biomass composition. Unfortunately, the chemical analysis data does not directly relate to all the biomass components needed for the pyrolysis kinetics.
+As discussed previously, the largest differences in the chemical analysis feedstock data are for the lignin, glucan, and mannan fractions. These fractions represent the cellulose (glucan), hemicellulose (xylan, galactan, arabinan, mannan, acetyl), and total lignin components of the biomass composition. Unfortunately, the chemical analysis data does not directly relate to all the biomass compositional components needed for the pyrolysis kinetics.
 
 Using the C and H values from the ultimate analysis CHO basis and default values for the splitting parameters, the biomass composition is estimated using the characterization method from Debiagi et al. The estimated cellulose, hemicellulose, and total lignin (LIGC + LIGH + LIGO) values are compared to the chemical analysis measurements using
 
@@ -199,7 +199,7 @@ Using the C and H values from the ultimate analysis CHO basis and default values
     f(\alpha, \beta, \gamma, \delta, \epsilon) = (cell_{est} - cell_{meas})^2 + (hemi_{est} - hemi_{meas})^2 + (lignin_{est} - lignin_{meas})^2
 \end{equation}
 
-\noindent where $f$ is the function to be minimized, $cell_{est}$ is the estimated cellulose, $cell_{meas}$ is the cellulose from chemical analysis, $hemi_{est}$ is the estimated hemicellulose, $hemi_{meas}$ is the hemicellulose from chemical analysis, $lignin_{est}$ is the estimated lignin, and $lignin_{meas}$ is the lignin from chemical analysis. The L-BFGS-B algorithm is applied to the minimization function to generate the optimum splitting parameter values such that the cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data. Figure \ref{fig:biocomp2} demonstrates the biomass composition minimization procedure.
+\noindent where $f$ is the function to be minimized, $cell_{est}$ is the estimated cellulose, $cell_{meas}$ is the cellulose from chemical analysis, $hemi_{est}$ is the estimated hemicellulose, $hemi_{meas}$ is the hemicellulose from chemical analysis, $lignin_{est}$ is the estimated lignin, and $lignin_{meas}$ is the lignin from chemical analysis. The L-BFGS-B algorithm is applied to the minimization function to generate the optimum splitting parameter values such that the estimated cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data. Figure \ref{fig:biocomp2} demonstrates the biomass composition minimization procedure.
 
 \begin{figure}[H]
     \centering
@@ -219,7 +219,7 @@ The material balance for a chemical reactor considers the inlet and outlet flows
     \end{aligned}
 \end{equation}
 
-\noindent where $A$ represents a chemical species, $C_A$ is the outlet concentration (mol/m$^3$), $C_{A0}$ is the inlet concentration (mol/m$^3$), $V$ is the reactor volume (m$^3$), $v$ is the volumetric flow rate (m$^3$/s), and $r_A$ is the reaction rate (mol/m$^3$s). The reaction rate is determined by multiplying a forward rate constant $k$ by the concentration in the tank. The rate constant is calculated from an Arrhenius function
+\noindent where $A$ represents some chemical species, $C_A$ is the outlet concentration (mol/m$^3$), $C_{A0}$ is the inlet concentration (mol/m$^3$), $V$ is the reactor volume (m$^3$), $v$ is the volumetric flow rate (m$^3$/s), and $r_A$ is the reaction rate (mol/m$^3$s). The reaction rate is determined by multiplying a forward rate constant $k$ by the concentration in the tank. The rate constant is calculated from an Arrhenius function
 
 \begin{equation}
     \label{eq:rate-constant}
