@@ -1,6 +1,6 @@
 # FCIC pyrolysis modeling
 
-This repository contains Python code for modeling the pyrolysis of biomass feedstocks associated with the FCIC project. The reduced-order models represent a bubbling fluidized bed reactor operating a fast pyrolysis conditions.
+This repository contains Python code for running batch and continuous stirred tank reactor models to estimate thermochemical biomass conversion at fast pyrolysis conditions. Results from the reduced-order models are compared to bubbling fluidized bed reactor experiments using various biomass derived feedstocks. This work is supported by the Feedstock-Conversion Interface Consortium (FCIC).
 
 ## Data
 
@@ -30,4 +30,4 @@ $ python src/run_biocomp_single.py
 
 ## Documentation
 
-Documentation for this project is generated with LaTeX. The `tex` folder contains all the LaTeX files along with the associated figure files. See the `tex/main.pdf` to read the documentation.
+Documentation for this project is generated with LaTeX. The `tex` folder contains all the LaTeX files along with the associated figure files. See the `tex/main.pdf` to read the documentation or click [here](https://github.com/wigging/fcic-pyrolysis/blob/main/tex/main.pdf) to view the PDF online.
