@@ -2,7 +2,7 @@
 
 \section{Model development}
 
-This section presents the equations used to convert the measured data to different bases for use in the reactor models. The biomass pyrolysis kinetics scheme along with the associated biomass characterization method is also detailed. Finally, the reduced-order batch and continous stirred tank reactor (CSTR) models are presented.
+This section presents the equations used to convert the measured data to different bases for use in the reactor models. The biomass pyrolysis kinetics scheme along with the associated biomass characterization method is also detailed. Finally, the reduced-order batch reactor and continous stirred tank reactor (CSTR) models are presented.
 
 \subsection{Basis of analysis}
 
@@ -162,7 +162,7 @@ The Debiagi kinetics rely on an initial biomass composition defined as cellulose
 
 \subsection{Biomass composition}
 
-According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical components of the biomass are defined as shown in Table \ref{tab:chem-components}. The Debiagi paper does not provide information on how to experimentally determine these components. However, the paper provides a characterization method which estimates the biomass composition based on elemental (ultimate) analysis data. The characterization method uses the carbon (C) and hydrogen (H) content of the biomass to predict the biochemical composition in terms of cellulose, hemicellulose, lignin, tannins, and triglycerides. Splitting parameters $\alpha$, $\beta$, $\gamma$, $\delta$, and $\epsilon$ are used to improve the validity of the characterization procedure by accounting for extractives in the biomass.
+According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical components of the biomass are defined as shown in Table \ref{tab:chem-components}. The Debiagi paper does not provide information on how to experimentally determine these components. However, the paper discusses a characterization method to estimate the biomass composition based on elemental (ultimate) analysis data. The characterization method uses the carbon (C) and hydrogen (H) content of the biomass to predict the biochemical composition in terms of cellulose, hemicellulose, lignin, tannins, and triglycerides. Splitting parameters $\alpha$, $\beta$, $\gamma$, $\delta$, and $\epsilon$ are used to improve the validity of the characterization procedure by accounting for extractives in the biomass.
 
 \begin{table}[H]
     \centering
@@ -193,13 +193,13 @@ According to the Debiagi et al. 2015 paper \cite{Debiagi-2015}, the chemical com
 
 As discussed previously, the largest differences in the chemical analysis feedstock data are for the lignin, glucan, and mannan fractions. These fractions represent the cellulose (glucan), hemicellulose (xylan, galactan, arabinan, mannan, acetyl), and total lignin components of the biomass composition. Unfortunately, the chemical analysis data does not directly relate to all the biomass compositional components needed for the pyrolysis kinetics.
 
-Using the C and H values from the ultimate analysis CHO basis and default values for the splitting parameters, the biomass composition is estimated using the characterization method from Debiagi et al. The estimated cellulose, hemicellulose, and total lignin (LIGC + LIGH + LIGO) values are compared to the chemical analysis measurements using
+Using the C and H values from the ultimate analysis CHO basis and default values for the splitting parameters ($\alpha = 0.6$, $\beta = 0.8$, $\gamma = 0.8$, $\delta = 1$, $\epsilon = 1$), the biomass composition is estimated using the characterization method from Debiagi et al. The estimated cellulose, hemicellulose, and total lignin (LIGC + LIGH + LIGO) values are then compared to the chemical analysis measurements using
 
 \begin{equation}
     f(\alpha, \beta, \gamma, \delta, \epsilon) = (cell_{est} - cell_{meas})^2 + (hemi_{est} - hemi_{meas})^2 + (lignin_{est} - lignin_{meas})^2
 \end{equation}
 
-\noindent where $f$ is the function to be minimized, $cell_{est}$ is the estimated cellulose, $cell_{meas}$ is the cellulose from chemical analysis, $hemi_{est}$ is the estimated hemicellulose, $hemi_{meas}$ is the hemicellulose from chemical analysis, $lignin_{est}$ is the estimated lignin, and $lignin_{meas}$ is the lignin from chemical analysis. The L-BFGS-B algorithm is applied to the minimization function to generate the optimum splitting parameter values such that the estimated cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data. Figure \ref{fig:biocomp2} demonstrates the biomass composition minimization procedure.
+\noindent where $f$ is the function to be minimized, $cell_{est}$ is the estimated cellulose, $cell_{meas}$ is the cellulose from chemical analysis, $hemi_{est}$ is the estimated hemicellulose, $hemi_{meas}$ is the hemicellulose from chemical analysis, $lignin_{est}$ is the estimated lignin, and $lignin_{meas}$ is the lignin from chemical analysis. The L-BFGS-B algorithm from the SciPy package \cite{Scipy-2020} is applied to the minimization function to generate the optimum splitting parameter values such that the estimated cellulose, hemicellulose, and total lignin are similar to the values obtained from the chemical analysis data. Figure \ref{fig:biocomp2} demonstrates the biomass composition minimization procedure.
 
 \begin{figure}[H]
     \centering
