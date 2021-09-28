@@ -281,7 +281,7 @@ Using the chemical analysis measurement data from Tables \ref{tab:chemical-1} an
     \end{tabular}
 \end{table}
 
-Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock that are suitable to use with the Debiagi et al. kinetics scheme. Chemical analysis values are listed in the Measured column while values from the biomass characterization procedure using the optimized splitting parameters are given in the Estimated column. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis measurements.
+The biomass compositions for each feedstock that are suitable to use with the Debiagi et al. kinetics scheme are provided in Table \ref{tab:biocomp3}. Chemical analysis values are listed in the Measured column while values from the biomass characterization procedure using the optimized splitting parameters are given in the Estimated column. As seen in the table, the optimization procedure is able to determine the appropriate splitting parameters when comparing the biomass composition to chemical analysis data. The biomass composition for the bark feedstock is the only composition that does not compare within 1\% of the chemical analysis measurements.
 
 \begin{longtable}{p{8cm}rr}
     \caption{Estimated biomass composition for each feedstock on a dry ash-free basis (DAF).}
@@ -455,7 +455,7 @@ Table \ref{tab:biocomp3} presents the biomass compositions for each feedstock th
     \multicolumn{3}{l}{$\alpha = 0.5387$, $\beta = 0.9443$, $\gamma = 0.7995$, $\delta = 0.9372$, $\epsilon = 0.9991$} \\
 \end{longtable}
 
-The biomass characterization of the Residues feedstock is visually shown in Figure \ref{fig:biocomp-diagram}. The feedstock's carbon-to-hydrogen ratio (CHO basis) obtained from chemical analysis data is marked with a triangle symbol. The reference mixtures obtained from the optimized splitting parameters are marked with square symbols that bound the feedstock with a dashed line.
+The biomass characterization of the Residues feedstock is visually shown in Figure \ref{fig:biocomp-diagram}. The feedstock's carbon-to-hydrogen ratio (CHO basis) obtained from chemical analysis data is marked with a triangle symbol. The reference mixtures obtained from the optimized splitting parameters are marked with square symbols that bound the feedstock with a dashed line. The grey region represents the possible range of characterization for a given carbon-to-hydrogen ratio and group of reference mixtures.
 
 \begin{figure}[H]
     \centering
@@ -471,7 +471,7 @@ To understand the time-scale and conversion profiles associated with the Debiagi
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/batch-biocomp.pdf}
-    \caption{Conversion profiles of the biomass composition for the Residues feedstock.}
+    \caption{Conversion profiles of the biomass composition for the Residues feedstock in the batch reactor model.}
     \label{fig:batch-biocomp}
 \end{figure}
 
@@ -502,7 +502,7 @@ To compare the experimental yields to the reactor model results, the measured pr
     \label{fig:batch-exp1}
 \end{figure}
 
-A comparison of the lumped yields to ash content in the feedstocks is shown in Figure \ref{fig:batch-exp2}. The experimental data and batch reactor model suggest a decrease in liquids (oil) yield with increasing ash content. The data and model also suggest a higher solids yield for increased ash content. Trends for the experimental data and model do not agree for the gases. Overall, the batch reactor model is able to qualitatively capture the effects of ash content on pyrolysis yields due to ash content in the biomass feedstock.
+A comparison of the lumped yields to the feedstock ash content is shown in Figure \ref{fig:batch-exp2}. The experimental data and batch reactor model suggest a decrease in liquids (bio-oil) yield with increasing ash content. The data and model also suggest a higher solids yield for increased ash content. Trends for the experimental data and model do not agree for the gases. Overall, the batch reactor model can qualitatively capture the effects of feedstock ash content on pyrolysis yields.
 
 \begin{figure}[H]
     \centering
@@ -511,7 +511,7 @@ A comparison of the lumped yields to ash content in the feedstocks is shown in F
     \label{fig:batch-exp2}
 \end{figure}
 
-The Debiagi et al. kinetics scheme makes it possible to predict individual components of the pyrolysis products. Yields for several chemical species generated from each feedstock using the batch reactor model are given in Figure \ref{fig:batch-chemicals}. The stem wood produced the largest mass fraction of acetaldehyde, acetic acid, and furfural. The bark plus needles feedstock generated the highest yield of formaldehyde. Needles produced the highest mass fraction for the heavy molecular weight lignin. Bark generated the largest yield of phenol and did not produce any noticeable amount of the heavy lignin.
+The Debiagi et al. kinetics scheme makes it possible to predict individual components of the pyrolysis products. Yields for several chemical species generated from each feedstock using the batch reactor model are given in Figure \ref{fig:batch-chemicals}. The stem wood produced the largest mass fraction of acetaldehyde, acetic acid, and furfural. The bark plus needles feedstock generated the highest yield of formaldehyde. Needles produced the highest mass fraction for the heavy molecular weight lignin. Bark generated the largest yield of phenol and did not produce any noticeable amount of heavy lignin. More information is needed regarding the desired chemical composition of the pyrolysis products before the model can suggest a preferred feedstock for chemical production.
 
 \begin{figure}[H]
     \centering
@@ -536,7 +536,7 @@ The effects of reactor temperature on product yields from the Residues feedstock
 
 \subsection{CSTR model}
 
-The conversion profiles associated with the modified Debiagi kinetics using a series of CSTR models for the Residues feedstock are shown in Figure \ref{fig:cstr-products}. The results represent a series of 1,000 CSTRs with a total residence time of 20 seconds, a constant reaction temperature of 773.15 K, and a pressure of 101,325 Pa.
+The yield profiles associated with the modified Debiagi kinetics using a series of CSTR models for the Residues feedstock are shown in Figure \ref{fig:cstr-products}. The results represent a series of 1,000 CSTRs with a total residence time of 20 seconds, a constant reaction temperature of 773.15 K, and a pressure of 101,325 Pa. As expected, the profiles are similar to the batch reactor model because the residence time for the series CSTR is the same as the reaction time in the batch reactor.
 
 \begin{figure}[H]
     \centering
