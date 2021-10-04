@@ -493,13 +493,44 @@ According to the experimental data from the NREL 2FBR, the char yield for the Re
     \label{fig:metaplastic}
 \end{figure}
 
-To compare the experimental yields to the reactor model results, the measured products from the NREL 2FBR are lumped into gases, liquids, and solids. Gases represent the light gas, condensables, and water vapor products. Liquids are the oil yield and solids are the char yield. Solids from the model are represented by the solid and metaplastic species. Figure \ref{fig:batch-exp1} compares the yields from the NREL 2FBR fluidized bed reactor to the batch reactor model. The batch reactor model results are within 10\% of the experimental yields. However, due to the inconsistent mass closures for the experimental data, there is some uncertainty in comparing the batch reactor model results to the measured values.
+To compare the experimental yields to the reactor model results, the measured products from the NREL 2FBR are lumped into gases, liquids, and solids as shown in Table \ref{tab:lumped-yields}. There is some uncertainty on how to compare the measured yields to the model results so two approaches are compared. The first approach (Case 1) includes the condensables and water vapor yields with the lumped gases. The second approach (Case 2) includes the condensables and water vapor with the lumped liquids yield. For the reactor model, chemical species are grouped into the gas, liquid, solid, and metaplastic phases according to Table \ref{tab:chem-species}. The model considers the solid and metaplastic phases as the lumped solids yield.
+
+\begin{table}[H]
+    \caption{Lumped products for comparing model results and experiment yields.}
+    \label{tab:lumped-yields}
+    \centering
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Lumped Yields} & \textbf{Gases} & \textbf{Liquids} & \textbf{Solids} \\
+        \midrule
+        Model phase            & gas            & liquid           & solid \\
+                               &                &                  & metaplastic \\
+        \midrule
+        Experiment yield       & light gas      & oil              & char \\
+        (Case 1)               & condensables   &                  & \\
+                               & water vapor    &                  & \\
+        \midrule
+        Experiment yield       & light gas      & oil              & char \\
+        (Case 2)               &                & condensables     & \\
+                               &                & water vapor      & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Figure \ref{fig:batch-exp1a} compares the experiment yields from the NREL 2FBR fluidized bed reactor to the batch reactor model using the Case 1 approach while Figure \ref{fig:batch-exp1b} uses the Case 2 approach. The batch reactor model results are generally within 10\% of the experimental yields for both cases. However, the Case 1 approach provides a better comparison of the lumped gases; consequently, further results discussed in this report use the Case 1 approach. Also, due to the lack of mass closure for the experimental data, there is some uncertainty in comparing the batch reactor model results to the measured NREL 2FBR yields. More experimental data is needed to understand the measurement errors associated with the product yields. Such errors could provide a better comparison of the model results to the experiment.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/batch-exp1.pdf}
-    \caption{Comparison of the experimental yields and the batch reactor model results. For each feedstock, model results are the top bar and experimental yields are the bottom bar.}
-    \label{fig:batch-exp1}
+    \includegraphics[width=\textwidth]{figures/batch-exp1a.pdf}
+    \caption{Comparison of the experimental yields and the batch reactor model results using the Case 1 approach. For each feedstock, model results are the top bar and experimental yields are the bottom bar.}
+    \label{fig:batch-exp1a}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/batch-exp1b.pdf}
+    \caption{Comparison of the experimental yields and the batch reactor model results using the Case 2 approach. For each feedstock, model results are the top bar and experimental yields are the bottom bar.}
+    \label{fig:batch-exp1b}
 \end{figure}
 
 A comparison of the lumped yields to the feedstock ash content is shown in Figure \ref{fig:batch-exp2}. The experimental data and batch reactor model suggest a decrease in liquids (bio-oil) yield with increasing ash content. The data and model also suggest a higher solids yield for increased ash content. Trends for the experimental data and model do not agree for the gases. Overall, the batch reactor model can qualitatively capture the effects of feedstock ash content on pyrolysis yields.
