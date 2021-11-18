@@ -1,6 +1,6 @@
-# FCIC pyrolysis modeling
+# CSTR and batch reactor modeling for biomass pyrolysis
 
-This repository contains Python code for running batch and continuous stirred tank reactor models to estimate thermochemical biomass conversion at fast pyrolysis conditions. Results from the reduced-order models are compared to bubbling fluidized bed reactor experiments using various biomass derived feedstocks. This work is supported by the Feedstock-Conversion Interface Consortium (FCIC).
+This repository contains Python code for running batch and continuous stirred tank reactor (CSTR) models to estimate thermochemical biomass conversion at fast pyrolysis conditions. Results from the reduced-order models are compared to bubbling fluidized bed reactor experiments using various biomass derived feedstocks. This work was supported by the Feedstock-Conversion Interface Consortium (FCIC).
 
 ## Data
 
@@ -30,4 +30,10 @@ $ python src/run_biocomp_single.py
 
 ## Documentation
 
-Documentation for this project is generated with LaTeX. The `tex` folder contains all the LaTeX files along with the associated figure files. See the `tex/main.pdf` to read the documentation or click [here](https://github.com/wigging/fcic-pyrolysis/blob/main/tex/main.pdf) to view the PDF online.
+Documentation for this project is generated with LaTeX. The `tex` folder contains all the LaTeX files along with the associated figure files. See the `tex/main.pdf` to read the documentation or click [here](https://github.com/wigging/batch-cstr-pyrolysis/blob/main/tex/main.pdf) to view the PDF online.
+
+## Citation
+
+To cite this work, use the "Cite this repository" feature available on the right side of this repository page or use the reference text given below.
+
+> Gavin Wiggins. CSTR and batch reactor modeling for biomass pyrolsyis. GitHub repository. Available at https://github.com/wigging/batch-cstr-pyrolysis.
