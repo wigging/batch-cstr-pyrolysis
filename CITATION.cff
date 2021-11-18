@@ -5,6 +5,5 @@ authors:
   given-names: "Gavin"
 title: "CSTR and batch reactor modeling for biomass pyrolysis"
 version: 21.11
-doi: 10.5281/zenodo.1234
 date-released: 2021-11-18
 url: "https://github.com/wigging/batch-cstr-pyrolysis"
