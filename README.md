@@ -15,9 +15,6 @@ The `diagrams` folder includes `.drawio` files. These files can be edited at htt
 The `src` folder contains all the Python code for the reactor models. Files prepended with `run_` can be executed from the command line. See the comments in each file for more information. Examples of running the code in a terminal are given below.
 
 ```bash
-# Go to the project directory
-$ cd fcic-pyrolysis
-
 # Run a batch reactor model for a single feedstock
 $ python src/run_batch_single.py
 
